@@ -1,0 +1,62 @@
+# === Go ===
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+*.out
+*.a
+
+# Go modules
+go.sum
+go.work
+go.work.sum
+
+# Go build cache & package cache
+/bin/
+/pkg/
+/obj/
+*.test
+*.prof
+
+# IDE/editor files
+.vscode/
+.idea/
+*.iml
+*.swp
+
+# === C ===
+# Object files, binaries, and archives
+*.o
+*.obj
+*.a
+*.so
+*.dll
+*.dylib
+*.out
+*.exe
+
+# Debugging files
+*.dSYM/
+*.gcda
+*.gcno
+*.gcov
+*.gch
+
+# Build directories
+/build/
+/bin/
+/lib/
+/dist/
+
+# Compilation database
+compile_commands.json
+
+# Makefiles
+*.d
+
+# IDE/editor files
+.vscode/
+.idea/
+*.iml
+*.swp
