@@ -1,4 +1,4 @@
-package interpreter
+package usecases
 
 import "github.com/lincketheo/ndbgo/internal/dtypes"
 

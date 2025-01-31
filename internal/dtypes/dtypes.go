@@ -36,11 +36,11 @@ const (
 	CI128
 )
 
-func ByteToDtype(b byte) (Dtype, bool) {
+func ByteToDtype(b byte) (Dtype, error) {
 	if !(b <= byte(CF128) && b >= byte(U8)) {
-		return 0, false
+		return 0, fmt.Errorf("Expected dtype, got byte: %v", b)
 	}
-	return Dtype(b), true
+	return Dtype(b), nil
 }
 
 func StrtoDtype(dtstr string) (Dtype, error) {
