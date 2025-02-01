@@ -19,11 +19,11 @@ const (
 
 func (c *ByteStack) popString() (string, error) {
 	if err := c.popByteExpect(byte(STRING)); err != nil {
-		return "", err
+		return "", utils.ErrorContext(err)
 	} else if byteLen, err := c.popByte(); err != nil {
-		return "", err
+		return "", utils.ErrorContext(err)
 	} else if ret, err := c.popBytes(int(byteLen)); err != nil {
-		return "", err
+		return "", utils.ErrorContext(err)
 	} else {
 		return string(ret), nil
 	}
@@ -31,11 +31,11 @@ func (c *ByteStack) popString() (string, error) {
 
 func (c *ByteStack) popUint32Arr() ([]uint32, error) {
 	if err := c.popByteExpect(byte(UINT32ARR)); err != nil {
-		return nil, err
+		return nil, utils.ErrorContext(err)
 	} else if b, err := c.popByte(); err != nil { // LEN
-		return nil, err
+		return nil, utils.ErrorContext(err)
 	} else if retb, err := c.popBytes(int(b) * 4); err != nil { // DATA
-		return nil, err
+		return nil, utils.ErrorContext(err)
 	} else {
 		return utils.BytesToUInt32Arr(retb), nil
 	}
@@ -43,9 +43,9 @@ func (c *ByteStack) popUint32Arr() ([]uint32, error) {
 
 func (c *ByteStack) popDtype() (dtypes.Dtype, error) {
 	if err := c.popByteExpect(byte(DTYPE)); err != nil {
-		return 0, err
+		return 0, utils.ErrorContext(err)
 	} else if retb, err := c.popByte(); err != nil {
-		return 0, err
+		return 0, utils.ErrorContext(err)
 	} else {
 		return dtypes.ByteToDtype(retb)
 	}

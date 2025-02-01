@@ -2,5 +2,5 @@ package config
 
 import "encoding/binary"
 
-const Debug = false
+const Debug = true
 var Endian = binary.LittleEndian

@@ -2,6 +2,8 @@ package bytecode
 
 import (
 	"fmt"
+
+	"github.com/lincketheo/ndbgo/internal/utils"
 )
 
 type ByteStack struct {
@@ -10,7 +12,7 @@ type ByteStack struct {
 }
 
 // ////////////////////////////////////// Utilities
-func createByteStack() ByteStack {
+func CreateByteStack() ByteStack {
 	data := make([]byte, 0, 20)
 	return ByteStack{data, 0}
 }
@@ -30,7 +32,7 @@ func (c ByteStack) empty() bool {
 // ////////////////////////////////////// POP
 func (c *ByteStack) popByte() (byte, error) {
 	if c.empty() {
-		return 0, fmt.Errorf("Poping byte but there are no bytes left")
+		return 0, fmt.Errorf("Popping byte but there are no bytes left")
 	}
 	ret := c.data[c.ip]
 	c.ip++
@@ -39,9 +41,9 @@ func (c *ByteStack) popByte() (byte, error) {
 
 func (c *ByteStack) popByteExpect(b byte) error {
 	if ret, err := c.popByte(); err != nil {
-		return err
+		return utils.ErrorContext(err)
 	} else if ret != b {
-		return fmt.Errorf(`Poping byte expected byte:
+		return fmt.Errorf(`Popping byte expected byte:
       %v but popped byte was: %v`, b, ret)
 	} else {
 		return nil
@@ -51,7 +53,7 @@ func (c *ByteStack) popByteExpect(b byte) error {
 func (c *ByteStack) popBytes(n int) ([]byte, error) {
 	ret := c.head()[0:n]
 	if len(ret) != n {
-		return nil, fmt.Errorf(`Poping %d bytes left
+		return nil, fmt.Errorf(`Popping %d bytes left
       but had %d leftover bytes`, n, len(ret))
 	}
 

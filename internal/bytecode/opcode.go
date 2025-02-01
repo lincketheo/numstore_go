@@ -12,7 +12,6 @@ const (
 	OP_CREATE opcode = iota
 	OP_CONNECT
 	OP_TERM
-	OP_EOF
 )
 
 func byteToOpcode(b byte) (opcode, bool) {
@@ -31,9 +30,10 @@ func byteToOpcode(b byte) (opcode, bool) {
 
 func (c *ByteStack) popOpcode() (opcode, error) {
 	if retb, err := c.popByte(); err != nil {
-		return 0, err
+		return 0, utils.ErrorContext(err)
 	} else if ret, ok := byteToOpcode(retb); !ok {
-		return 0, fmt.Errorf("Poped byte was not an expected OPCode")
+		return 0, fmt.Errorf("Popped byte: %d was not an expected OPCode",
+			retb)
 	} else {
 		return ret, nil
 	}
@@ -41,7 +41,7 @@ func (c *ByteStack) popOpcode() (opcode, error) {
 
 func (c *ByteStack) popOpcodeExpect(o opcode) error {
 	if ret, err := c.popOpcode(); err != nil {
-		return err
+		return utils.ErrorContext(err)
 	} else if ret != o {
 		return fmt.Errorf("Expecting opcode: %d but got code: %d", o, ret)
 	}

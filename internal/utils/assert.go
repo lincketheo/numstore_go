@@ -13,7 +13,5 @@ func ASSERT(expr bool) {
 }
 
 func UNREACHABLE() {
-	if config.Debug {
-		panic("Unreachable code reached")
-	}
+  panic("Unreachable code reached")
 }

@@ -23,6 +23,8 @@ Protocol
 File Format
 db/
   rel1/
+    indexes
+    index1 - based on "a[0,0]"
     var1/
       data - contiguous data ordered by insertion index (as a sparse matrix - might be multiple files)
     var2/

@@ -3,13 +3,14 @@ package bytecode
 import (
 	"github.com/lincketheo/ndbgo/internal/logging"
 	"github.com/lincketheo/ndbgo/internal/usecases"
+	"github.com/lincketheo/ndbgo/internal/utils"
 )
 
 func (b *ByteStack) CreateDB(db string) error {
 	logging.Debug("Pushing CREATE DB: %s onto the stack\n", db)
 	b.pushOpcode(OP_CREATE)
 	if err := b.pushEntityWithName(E_DB, db); err != nil {
-		return err
+		return utils.ErrorContext(err)
 	}
 	b.pushOpcode(OP_TERM)
 	return nil
@@ -19,22 +20,25 @@ func (b *ByteStack) CreateRel(rel string) error {
 	logging.Debug("Pushing CREATE REL: %s onto the stack\n", rel)
 	b.pushOpcode(OP_CREATE)
 	if err := b.pushEntityWithName(E_REL, rel); err != nil {
-		return err
+		return utils.ErrorContext(err)
 	}
 	b.pushOpcode(OP_TERM)
 	return nil
 }
 
-func (b *ByteStack) CreateVar(args usecases.CreateVarArgs) error {
+func (b *ByteStack) CreateVar(
+	vari string,
+	args usecases.VarConfig,
+) error {
 	logging.Debug(`Pushing CREATE Var: %s onto the stack\n
-      Shape: %v Dtype: %v`, args.Vari, args.Shape, args.Dtype)
+      Shape: %v Dtype: %v`, vari, args.Shape, args.Dtype)
 
 	// CREATE
 	b.pushOpcode(OP_CREATE)
 
 	// NAME
-	if err := b.pushEntityWithName(E_VAR, args.Vari); err != nil {
-		return err
+	if err := b.pushEntityWithName(E_VAR, vari); err != nil {
+		return utils.ErrorContext(err)
 	}
 
 	// DTYPE CONFIG
@@ -42,7 +46,7 @@ func (b *ByteStack) CreateVar(args usecases.CreateVarArgs) error {
 
 	// SHAPE CONFIG
 	if err := b.pushVarShapeConfig(args.Shape); err != nil {
-		return err
+		return utils.ErrorContext(err)
 	}
 
 	// TERM
@@ -50,7 +54,7 @@ func (b *ByteStack) CreateVar(args usecases.CreateVarArgs) error {
 	return nil
 }
 
-func (b *ByteStack) ConnectDB(db string, create bool) error {
+func (b *ByteStack) ConnectDB(db string) error {
 	logging.Debug("Pushing CONNECT db: %s onto the stack\n", db)
 
 	// CONNECT
@@ -58,7 +62,7 @@ func (b *ByteStack) ConnectDB(db string, create bool) error {
 
 	// NAME
 	if err := b.pushEntityWithName(E_DB, db); err != nil {
-		return err
+		return utils.ErrorContext(err)
 	}
 
 	// TERM
@@ -66,7 +70,7 @@ func (b *ByteStack) ConnectDB(db string, create bool) error {
 	return nil
 }
 
-func (b *ByteStack) ConnectRel(rel string, create bool) error {
+func (b *ByteStack) ConnectRel(rel string) error {
 	logging.Debug("Pushing CONNECT rel: %s onto the stack\n", rel)
 
 	// CONNECT
@@ -74,7 +78,7 @@ func (b *ByteStack) ConnectRel(rel string, create bool) error {
 
 	// NAME
 	if err := b.pushEntityWithName(E_REL, rel); err != nil {
-		return err
+		return utils.ErrorContext(err)
 	}
 
 	// TERM
@@ -83,12 +87,13 @@ func (b *ByteStack) ConnectRel(rel string, create bool) error {
 	return nil
 }
 
-func (b *ByteStack) ConnectVar(vari string, create bool) error {
+func (b *ByteStack) ConnectVar(vari string) error {
 	logging.Debug("Pushing CONNECT var: %s onto the stack\n", vari)
 
 	b.pushOpcode(OP_CONNECT)
+
 	if err := b.pushEntityWithName(E_VAR, vari); err != nil {
-		return err
+		return utils.ErrorContext(err)
 	}
 
 	b.pushOpcode(OP_TERM)
