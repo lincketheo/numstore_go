@@ -20,6 +20,10 @@ func IntCanPlus(a int, b int) bool {
 	return !IntPlusWillOverflow(a, b) && !IntPlusWillUnderflow(a, b)
 }
 
+func CanUint64BeUint32(n uint64) bool {
+	return n <= uint64(^uint32(0))
+}
+
 func CanIntBeByte(n int) bool {
 	return n >= 0 && n <= 255
 }

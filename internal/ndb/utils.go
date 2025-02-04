@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/lincketheo/ndbgo/internal/dtypes"
+	"github.com/lincketheo/ndbgo/internal/logging"
 	"github.com/lincketheo/ndbgo/internal/utils"
 )
 
@@ -38,16 +39,6 @@ func varMetaExists(db, rel, vari string) (bool, error) {
 	}
 }
 
-func varCreateDir(db, rel, vari string) error {
-	if fname, err := varFolderName(db, rel, vari); err != nil {
-		return err
-	} else if err = os.Mkdir(fname, 0755); err != nil {
-		return err
-	} else {
-		return nil
-	}
-}
-
 func varCreateMeta(
 	db, rel, vari string,
 	dtype dtypes.Dtype,
@@ -59,21 +50,22 @@ func varCreateMeta(
 
 	// Check if it already exists
 	if exists, err := varMetaExists(db, rel, vari); err != nil {
-		return nil
+		return utils.ErrorContext(err)
 	} else if exists {
 		return fmt.Errorf("Meta for variable: %s already exists", vari)
+	}
+
+	fname, err = varMetaName(db, rel, vari)
+	if err != nil {
+		return err
 	}
 
 	// Create the file and write the header
 	fp, err := os.Create(fname)
 	if err != nil {
-		return err
+		return utils.ErrorContext(err)
 	}
-	defer func() {
-		if cerr := fp.Close(); cerr != nil {
-			err = cerr
-		}
-	}()
+	defer fp.Close()
 
 	if err = varWriteHeader(fp, dtype, shape); err != nil {
 		return err
@@ -110,8 +102,7 @@ func varWriteHeader(
 	return nil
 }
 
-// /////////////////////////////// PUBLIC
-func DbExists(db string) (bool, error) {
+func dbExists(db string) (bool, error) {
 	if name, err := dbFolderName(db); err != nil {
 		return false, err
 	} else if exists, err := utils.DirExists(name); err != nil {
@@ -121,7 +112,7 @@ func DbExists(db string) (bool, error) {
 	}
 }
 
-func RelExists(db, rel string) (bool, error) {
+func relExists(db, rel string) (bool, error) {
 	if name, err := relFolderName(db, rel); err != nil {
 		return false, err
 	} else if exists, err := utils.DirExists(name); err != nil {
@@ -131,12 +122,58 @@ func RelExists(db, rel string) (bool, error) {
 	}
 }
 
-func VarExists(db, rel, vari string) (bool, error) {
+func varExists(db, rel, vari string) (bool, error) {
 	if name, err := varFolderName(db, rel, vari); err != nil {
 		return false, err
 	} else if exists, err := utils.DirExists(name); err != nil {
 		return false, err
 	} else {
 		return exists, nil
+	}
+}
+
+// ///////////////////////////////// Connections
+func (f *NDBimpl) disconnectDb() {
+	f.dbConnected = false
+	f.relConnected = false
+	f.variConnected = false
+
+	f.db = ""
+	f.rel = ""
+	f.vari = ""
+}
+
+func (f *NDBimpl) disconnectRel() {
+	f.relConnected = false
+	f.variConnected = false
+
+	f.rel = ""
+	f.vari = ""
+}
+
+func (f *NDBimpl) disconnectVar() {
+	f.variConnected = false
+
+	f.vari = ""
+}
+
+// ///////////////////////////////// Utils
+func (f *NDBimpl) isDisconnected() bool {
+	return !f.dbConnected && !f.variConnected && !f.relConnected
+}
+
+func (f *NDBimpl) logConnectionState() {
+	logging.Info("Connection state:")
+	if f.isDisconnected() {
+		logging.Info("  Disconnected")
+	}
+	if f.dbConnected {
+		logging.Info("  Database: %s\n", f.db)
+	}
+	if f.relConnected {
+		logging.Info("  Relation: %s\n", f.rel)
+	}
+	if f.variConnected {
+		logging.Info("  Variable: %s\n", f.vari)
 	}
 }

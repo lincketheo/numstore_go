@@ -2,7 +2,7 @@ package usecases
 
 import (
 	"github.com/lincketheo/ndbgo/internal/dtypes"
-	"github.com/lincketheo/ndbgo/internal/logging"
+	"github.com/lincketheo/ndbgo/internal/utils"
 )
 
 // ///////////////////////////// CREATE
@@ -21,39 +21,34 @@ type NDB interface {
 	ConnectDB(db string) error
 	ConnectRel(rel string) error
 	ConnectVar(vari string) error
+
+  Read(a *NDBApp)
 }
 
-// ///////////////////////////// Simple logging implementation
-
-type NDBlogger struct{}
-
-func (n NDBlogger) CreateDB(db string) error {
-	logging.Debug("Executing CREATE DB: %s\n", db)
-	return nil
+func CreateDBRel(
+	db,
+	rel string,
+	n *NDB,
+) error {
+	if err := (*n).ConnectDB(db); err != nil {
+		return utils.ErrorContext(err)
+	} else {
+		return utils.ErrorContext((*n).CreateRel(rel))
+	}
 }
 
-func (n NDBlogger) CreateRel(rel string) error {
-	logging.Debug("Executing CREATE REL: %s\n", rel)
-	return nil
-}
-
-func (n NDBlogger) CreateVar(vari string, args VarConfig) error {
-	logging.Debug(`Executing CREATE Var: %s\n
-      Shape: %v Dtype: %v`, vari, args.Shape, args.Dtype)
-	return nil
-}
-
-func (n NDBlogger) ConnectDB(db string) error {
-	logging.Debug("Executing CONNECT db: %s\n", db)
-	return nil
-}
-
-func (n NDBlogger) ConnectRel(rel string) error {
-	logging.Debug("Executing CONNECT rel: %s\n", rel)
-	return nil
-}
-
-func (n NDBlogger) ConnectVar(vari string) error {
-	logging.Debug("Executing CONNECT var: %s\n", vari)
-	return nil
+func CreateDBRelVar(
+	db,
+	rel,
+	vari string,
+	config VarConfig,
+	n *NDB,
+) error {
+	if err := (*n).ConnectDB(db); err != nil {
+		return utils.ErrorContext(err)
+	} else if err = (*n).ConnectRel(rel); err != nil {
+		return utils.ErrorContext(err)
+	} else {
+		return utils.ErrorContext((*n).CreateVar(vari, config))
+	}
 }

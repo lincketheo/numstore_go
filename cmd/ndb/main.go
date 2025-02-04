@@ -4,12 +4,13 @@ import (
 	"os"
 
 	"github.com/lincketheo/ndbgo/internal/logging"
+	"github.com/lincketheo/ndbgo/internal/ndb"
 	"github.com/lincketheo/ndbgo/internal/repl"
 	"github.com/lincketheo/ndbgo/internal/usecases"
 )
 
 func main() {
-	var _n usecases.NDBlogger
+	var _n ndb.NDBimpl
 	var n usecases.NDB = &_n
 
 	if len(os.Args) > 2 {

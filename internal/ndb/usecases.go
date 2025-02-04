@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/lincketheo/ndbgo/internal/interpreter"
+	"github.com/lincketheo/ndbgo/internal/logging"
+	"github.com/lincketheo/ndbgo/internal/usecases"
+	"github.com/lincketheo/ndbgo/internal/utils"
 )
 
 type NDBimpl struct {
@@ -30,13 +32,25 @@ func CreateNDBimpl() NDBimpl {
 }
 
 func (f NDBimpl) CreateDB(db string) error {
-	if fname, err := dbFolderName(db); err != nil {
-		return err
-	} else if err = os.Mkdir(fname, 0755); err != nil {
-		return err
-	}
+	// Check if db already exists
 
-	return nil
+	// Check if relation already exists
+	if exists, err := dbExists(db); err != nil {
+		return utils.ErrorContext(err)
+	} else if exists {
+		return fmt.Errorf("Database: %s already exists", db)
+
+		// Create database folder
+	} else if fname, err := dbFolderName(db); err != nil {
+		return utils.ErrorContext(err)
+	} else if err = os.Mkdir(fname, 0755); err != nil {
+		return utils.ErrorContext(err)
+
+		// Log and return
+	} else {
+		logging.Info("Created db in: %s\n", fname)
+		return nil
+	}
 }
 
 func (f NDBimpl) CreateRel(rel string) error {
@@ -45,18 +59,29 @@ func (f NDBimpl) CreateRel(rel string) error {
       but you are not connected to any database`)
 	}
 
-	// Assume db folder exists
+	// Check if relation already exists
+	if exists, err := relExists(f.db, rel); err != nil {
+		return utils.ErrorContext(err)
+	} else if exists {
+		return fmt.Errorf("Relation: %s already exists", rel)
 
-	if fname, err := relFolderName(f.db, rel); err != nil {
-		return err
+		// Create relation folder
+	} else if fname, err := relFolderName(f.db, rel); err != nil {
+		return utils.ErrorContext(err)
 	} else if err = os.Mkdir(fname, 0755); err != nil {
-		return err
-	}
+		return utils.ErrorContext(err)
 
-	return nil
+		// Log and return
+	} else {
+		logging.Info("Created rel in: %s\n", fname)
+		return nil
+	}
 }
 
-func (f NDBimpl) CreateVar(args interpreter.CreateVarArgs) error {
+func (f NDBimpl) CreateVar(
+	vari string,
+	config usecases.VarConfig,
+) error {
 	if !f.dbConnected {
 		return fmt.Errorf(`Trying to create a Relation,
       but you are not connected to any database`)
@@ -65,39 +90,45 @@ func (f NDBimpl) CreateVar(args interpreter.CreateVarArgs) error {
       but you are not connected to any relation`)
 	}
 
-	// Assume db and rel folders exists
+	// Check if variable already exists
+	if exists, err := varExists(f.db, f.rel, vari); err != nil {
+		return utils.ErrorContext(err)
+	} else if exists {
+		return fmt.Errorf("Variable: %s already exists", vari)
 
-	if err := varCreateDir(
-		f.db,
-		f.rel,
-		args.Vari,
-	); err != nil {
-		return err
-	} else if err = varCreateMeta(
-		f.db,
-		f.rel,
-		args.Vari,
-		args.Dtype,
-		args.Shape,
-	); err != nil {
-		return err
+		// Create the variable folder
+	} else if dir, err := varFolderName(f.db, f.rel, vari); err != nil {
+		return utils.ErrorContext(err)
+	} else if err = os.Mkdir(dir, 0755); err != nil {
+		return utils.ErrorContext(err)
+
+		// Create Meta File
+	} else if meta, err := varMetaName(f.db, f.rel, vari); err != nil {
+		return utils.ErrorContext(err)
+	} else {
+		// Create meta file
+		fp, err := os.Create(meta)
+		if err != nil {
+			return utils.ErrorContext(err)
+		}
+		defer fp.Close()
+
+		// Write the header
+		if err = varWriteHeader(fp, config.Dtype, config.Shape); err != nil {
+			return utils.ErrorContext(err)
+		}
+
+		// Log and return
+		logging.Info("Created db in: %s\n", dir)
+		logging.Info("Created db meta in: %s\n", meta)
+		return nil
+
 	}
-	return nil
-}
-
-func (f *NDBimpl) disconnectDb() {
-	f.dbConnected = false
-	f.relConnected = false
-	f.variConnected = false
-
-	f.db = ""
-	f.rel = ""
-	f.vari = ""
 }
 
 func (f *NDBimpl) ConnectDB(db string) error {
-	if exists, err := DbExists(db); err != nil {
-		return err
+	if exists, err := dbExists(db); err != nil {
+		return utils.ErrorContext(err)
 	} else if !exists {
 		return fmt.Errorf(`Trying to connect to database: %s,
       but it doesn't exist`, db)
@@ -106,16 +137,9 @@ func (f *NDBimpl) ConnectDB(db string) error {
 	f.disconnectDb()
 	f.db = db
 	f.dbConnected = true
+	f.logConnectionState()
 
 	return nil
-}
-
-func (f *NDBimpl) disconnectRel() {
-	f.relConnected = false
-	f.variConnected = false
-
-	f.rel = ""
-	f.vari = ""
 }
 
 func (f *NDBimpl) ConnectRel(rel string) error {
@@ -124,8 +148,8 @@ func (f *NDBimpl) ConnectRel(rel string) error {
       but you are not connected to any database`)
 	}
 
-	if exists, err := RelExists(f.db, rel); err != nil {
-		return err
+	if exists, err := relExists(f.db, rel); err != nil {
+		return utils.ErrorContext(err)
 	} else if !exists {
 		return fmt.Errorf(`Trying to connect to relation: %s,
       but it doesn't exist`, rel)
@@ -134,14 +158,9 @@ func (f *NDBimpl) ConnectRel(rel string) error {
 	f.disconnectRel()
 	f.rel = rel
 	f.relConnected = true
+	f.logConnectionState()
 
 	return nil
-}
-
-func (f *NDBimpl) disconnectVar() {
-	f.variConnected = false
-
-	f.vari = ""
 }
 
 func (f *NDBimpl) ConnectVar(vari string) error {
@@ -153,8 +172,8 @@ func (f *NDBimpl) ConnectVar(vari string) error {
       but you are not connected to any relation`)
 	}
 
-	if exists, err := VarExists(f.db, f.rel, vari); err != nil {
-		return err
+	if exists, err := varExists(f.db, f.rel, vari); err != nil {
+		return utils.ErrorContext(err)
 	} else if !exists {
 		return fmt.Errorf(`Trying to connect to Variable: %s,
       but it doesn't exist`, vari)
@@ -163,6 +182,7 @@ func (f *NDBimpl) ConnectVar(vari string) error {
 	f.disconnectVar()
 	f.vari = vari
 	f.variConnected = true
+	f.logConnectionState()
 
 	return nil
 }
