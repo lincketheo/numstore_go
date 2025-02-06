@@ -1,137 +1,113 @@
 package ndb
 
 import (
-	"fmt"
+	"errors"
 	"os"
 
-	"github.com/lincketheo/ndbgo/internal/logging"
 	"github.com/lincketheo/ndbgo/internal/usecases"
 	"github.com/lincketheo/ndbgo/internal/utils"
 )
 
 type NDBimpl struct {
-	db   string
-	rel  string
-	vari string
+	db  string
+	rel string
 
-	dbConnected   bool
-	relConnected  bool
-	variConnected bool
+	dbConnected  bool
+	relConnected bool
 }
 
+// Constructor
 func CreateNDBimpl() NDBimpl {
 	return NDBimpl{
-		db:   "",
-		rel:  "",
-		vari: "",
+		db:  "",
+		rel: "",
 
-		dbConnected:   false,
-		relConnected:  false,
-		variConnected: false,
+		dbConnected:  false,
+		relConnected: false,
 	}
 }
 
+// TODO - check validity of names
+
 func (f NDBimpl) CreateDB(db string) error {
-	// Check if db already exists
-
-	// Check if relation already exists
-	if exists, err := dbExists(db); err != nil {
-		return utils.ErrorContext(err)
-	} else if exists {
-		return fmt.Errorf("Database: %s already exists", db)
-
-		// Create database folder
-	} else if fname, err := dbFolderName(db); err != nil {
-		return utils.ErrorContext(err)
-	} else if err = os.Mkdir(fname, 0755); err != nil {
-		return utils.ErrorContext(err)
-
-		// Log and return
-	} else {
-		logging.Info("Created db in: %s\n", fname)
-		return nil
+	if err := expectDbExistance(db, false); err != nil {
+		return err
 	}
+	if err := createDBFolder(db); err != nil {
+		return err
+	}
+	if err := createDBNoRelFolder(db); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (f NDBimpl) CreateRel(rel string) error {
-	if !f.dbConnected {
-		return fmt.Errorf(`Trying to create a Relation,
-      but you are not connected to any database`)
+	if err := f.expectDbConnection(true); err != nil {
+		return err
 	}
-
-	// Check if relation already exists
-	if exists, err := relExists(f.db, rel); err != nil {
-		return utils.ErrorContext(err)
-	} else if exists {
-		return fmt.Errorf("Relation: %s already exists", rel)
-
-		// Create relation folder
-	} else if fname, err := relFolderName(f.db, rel); err != nil {
-		return utils.ErrorContext(err)
-	} else if err = os.Mkdir(fname, 0755); err != nil {
-		return utils.ErrorContext(err)
-
-		// Log and return
-	} else {
-		logging.Info("Created rel in: %s\n", fname)
-		return nil
+	if err := f.expectRelExistance(rel, true); err != nil {
+		return err
 	}
+	if err := f.createRelFolder(rel); err != nil {
+		return err
+	}
+	return nil
 }
 
-func (f NDBimpl) CreateVar(
-	vari string,
-	config usecases.VarConfig,
-) error {
-	if !f.dbConnected {
-		return fmt.Errorf(`Trying to create a Relation,
-      but you are not connected to any database`)
-	} else if !f.relConnected {
-		return fmt.Errorf(`Trying to create a Variable,
-      but you are not connected to any relation`)
+func (f NDBimpl) CreateVar(variStr string, config usecases.VarConfig) error {
+	if err := f.expectDbConnection(true); err != nil {
+		return err
 	}
 
-	// Check if variable already exists
-	if exists, err := varExists(f.db, f.rel, vari); err != nil {
-		return utils.ErrorContext(err)
-	} else if exists {
-		return fmt.Errorf("Variable: %s already exists", vari)
+	var rel string = f.rel
+	var vari string = variStr
+	var err error
 
-		// Create the variable folder
-	} else if dir, err := varFolderName(f.db, f.rel, vari); err != nil {
-		return utils.ErrorContext(err)
-	} else if err = os.Mkdir(dir, 0755); err != nil {
-		return utils.ErrorContext(err)
+	// If not connected to rel
+	if !f.relConnected {
 
-		// Create Meta File
-	} else if meta, err := varMetaName(f.db, f.rel, vari); err != nil {
-		return utils.ErrorContext(err)
-	} else {
-		// Create meta file
-		fp, err := os.Create(meta)
-		if err != nil {
-			return utils.ErrorContext(err)
+		// Check if the format is rel:vari
+		if cvari, crel, ok := parseRelVarStr(vari); ok {
+			vari = cvari
+			rel = crel
+
+			// Connect to relationship temporarily
+			if err = f.ConnectRel(rel); err != nil {
+				return utils.ErrorMoref(err,
+					`Failed to connect to relation: %s
+          while trying to create var: %s`, rel, vari)
+			}
+
+			// Disconnect from relationship
+			defer func() {
+				if cerr := f.DisconnectRel(); cerr != nil {
+					err = cerr
+				}
+			}()
+
+			// Otherwise use no rel
+		} else {
+			rel = noRel
 		}
-		defer fp.Close()
-
-		// Write the header
-		if err = varWriteHeader(fp, config.Dtype, config.Shape); err != nil {
-			return utils.ErrorContext(err)
-		}
-
-		// Log and return
-		logging.Info("Created db in: %s\n", dir)
-		logging.Info("Created db meta in: %s\n", meta)
-		return nil
-
 	}
+
+	if err := f.expectVarExistance(rel, vari, true); err != nil {
+		return err
+	}
+	if err := f.createVariFolder(rel, vari); err != nil {
+		return err
+	}
+	if err := f.varCreateMeta(rel, vari, config.Dtype, config.Shape); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (f *NDBimpl) ConnectDB(db string) error {
-	if exists, err := dbExists(db); err != nil {
-		return utils.ErrorContext(err)
-	} else if !exists {
-		return fmt.Errorf(`Trying to connect to database: %s,
-      but it doesn't exist`, db)
+	if err := expectDbExistance(db, true); err != nil {
+		return err
 	}
 
 	f.disconnectDb()
@@ -143,16 +119,11 @@ func (f *NDBimpl) ConnectDB(db string) error {
 }
 
 func (f *NDBimpl) ConnectRel(rel string) error {
-	if !f.dbConnected {
-		return fmt.Errorf(`Trying to connect to a Relation,
-      but you are not connected to any database`)
+	if err := f.expectDbConnection(true); err != nil {
+		return err
 	}
-
-	if exists, err := relExists(f.db, rel); err != nil {
-		return utils.ErrorContext(err)
-	} else if !exists {
-		return fmt.Errorf(`Trying to connect to relation: %s,
-      but it doesn't exist`, rel)
+	if err := f.expectRelExistance(rel, true); err != nil {
+		return err
 	}
 
 	f.disconnectRel()
@@ -163,26 +134,109 @@ func (f *NDBimpl) ConnectRel(rel string) error {
 	return nil
 }
 
-func (f *NDBimpl) ConnectVar(vari string) error {
-	if !f.dbConnected {
-		return fmt.Errorf(`Trying to connect to a Variable,
-      but you are not connected to any database`)
-	} else if !f.relConnected {
-		return fmt.Errorf(`Trying to connect to a Variable,
-      but you are not connected to any relation`)
+func (f *NDBimpl) DisconnectDB() error {
+	if err := f.expectDbConnection(true); err != nil {
+		return err
 	}
-
-	if exists, err := varExists(f.db, f.rel, vari); err != nil {
-		return utils.ErrorContext(err)
-	} else if !exists {
-		return fmt.Errorf(`Trying to connect to Variable: %s,
-      but it doesn't exist`, vari)
-	}
-
-	f.disconnectVar()
-	f.vari = vari
-	f.variConnected = true
-	f.logConnectionState()
-
+	f.disconnectDb()
 	return nil
+}
+
+func (f *NDBimpl) DisconnectRel() error {
+	if err := f.expectRelConnection(false); err != nil {
+		return err
+	}
+	f.disconnectRel()
+	return nil
+}
+
+func (f *NDBimpl) DeleteDB(db string) error {
+	if err := f.expectDbConnection(false); err != nil {
+		return err
+	}
+	if err := expectDbExistance(db, true); err != nil {
+		return err
+	}
+	return os.RemoveAll(dbFolderName(db))
+}
+
+func (f *NDBimpl) DeleteRel(rel string) error {
+	if err := f.expectRelConnection(false); err != nil {
+		return err
+	}
+	if err := f.expectDbConnection(true); err != nil {
+		return err
+	}
+	if err := f.expectRelExistance(rel, true); err != nil {
+		return err
+	}
+	return os.RemoveAll(f.relFolderName(rel))
+}
+
+func (f *NDBimpl) DeleteVar(variStr string) error {
+	if err := f.expectDbConnection(true); err != nil {
+		return err
+	}
+
+	var rel string = f.rel
+	var vari string = variStr
+	var err error
+
+	// If not connected to rel
+	if !f.relConnected {
+
+		// Check if the format is rel:vari
+		if cvari, crel, ok := parseRelVarStr(vari); ok {
+			vari = cvari
+			rel = crel
+
+			// Connect to relationship temporarily
+			if err = f.ConnectRel(rel); err != nil {
+				return utils.ErrorMoref(err,
+					`Failed to connect to relation: %s
+          while trying to create var: %s`, rel, vari)
+			}
+
+			// Disconnect from relationship
+			defer func() {
+				if cerr := f.DisconnectRel(); cerr != nil {
+					err = cerr
+				}
+			}()
+
+			// Otherwise use no rel
+		} else {
+			rel = noRel
+		}
+	}
+
+	if err := f.expectVarExistance(rel, vari, true); err != nil {
+		return err
+	}
+
+	return os.RemoveAll(f.varFolderName(rel, vari))
+}
+
+func (n *NDBimpl) AddReader(config usecases.ReaderConfig) (int, error) {
+	return 0, errors.New("Unimplemented")
+}
+
+func (n *NDBimpl) RemoveReader(id int) error {
+	return errors.New("Unimplemented")
+}
+
+func (n *NDBimpl) AddWriter(config usecases.WriterConfig) (int, error) {
+	return 0, errors.New("Unimplemented")
+}
+
+func (n *NDBimpl) RemoveWriter(id int) error {
+	return errors.New("Unimplemented")
+}
+
+func (n *NDBimpl) Write(args usecases.WriteArgs) error {
+	return errors.New("Unimplemented")
+}
+
+func (n *NDBimpl) Read(args usecases.ReadArgs) error {
+	return errors.New("Unimplemented")
 }

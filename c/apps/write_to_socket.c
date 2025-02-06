@@ -4,14 +4,12 @@
 #include <string.h>
 #include <unistd.h>
 
-void error_exit(const char* msg)
-{
+void error_exit(const char *msg) {
   perror(msg);
   exit(EXIT_FAILURE);
 }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
   if (argc != 2) {
     fprintf(stderr, "Usage: %s <PORT>\n", argv[0]);
     return EXIT_FAILURE;
@@ -40,10 +38,7 @@ int main(int argc, char* argv[])
   }
 
   // CONNECT
-  ret = connect(
-      sock,
-      (struct sockaddr*)&server_addr,
-      sizeof(server_addr));
+  ret = connect(sock, (struct sockaddr *)&server_addr, sizeof(server_addr));
 
   if (ret == -1) {
     error_exit("connect");

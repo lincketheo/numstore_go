@@ -16,5 +16,4 @@ typedef struct {
 // Opens up port [port_num] with specified write arguments
 // Ironically "write" refers to the command, so this is a
 // server that strictly reads (the client is writing to me)
-ndbc_ret_t
-write_server(write_args args);
+ndbc_ret_t write_server(write_args args);

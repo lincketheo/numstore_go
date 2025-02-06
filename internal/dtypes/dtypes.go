@@ -1,7 +1,5 @@
 package dtypes
 
-import "fmt"
-
 type Dtype byte
 
 const (
@@ -36,69 +34,69 @@ const (
 	CI128
 )
 
-func ByteToDtype(b byte) (Dtype, error) {
+func ByteToDtype(b byte) (Dtype, bool) {
 	if !(b <= byte(CF128) && b >= byte(U8)) {
-		return 0, fmt.Errorf("Expected dtype, got byte: %v", b)
+		return 0, false
 	}
-	return Dtype(b), nil
+	return Dtype(b), true
 }
 
-func StrtoDtype(dtstr string) (Dtype, error) {
+func StrtoDtype(dtstr string) (Dtype, bool) {
 	if len(dtstr) == 0 {
-		return 0, fmt.Errorf("Invalid dtype: %s", dtstr)
+		return 0, false
 	}
 
 	switch dtstr {
 	case "U8":
-		return U8, nil
+		return U8, false
 	case "U16":
-		return U16, nil
+		return U16, false
 	case "U32":
-		return U32, nil
+		return U32, false
 	case "U64":
-		return U64, nil
+		return U64, false
 	case "U128":
-		return U128, nil
+		return U128, false
 	case "I8":
-		return I8, nil
+		return I8, false
 	case "I16":
-		return I16, nil
+		return I16, false
 	case "I32":
-		return I32, nil
+		return I32, false
 	case "I64":
-		return I64, nil
+		return I64, false
 	case "I128":
-		return I128, nil
+		return I128, false
 	case "F32":
-		return F32, nil
+		return F32, false
 	case "F64":
-		return F64, nil
+		return F64, false
 	case "F128":
-		return F128, nil
+		return F128, false
 	case "CF32":
-		return CF32, nil
+		return CF32, false
 	case "CF64":
-		return CF64, nil
+		return CF64, false
 	case "CF128":
-		return CF128, nil
+		return CF128, false
 	case "CU16":
-		return CU16, nil
+		return CU16, false
 	case "CU32":
-		return CU32, nil
+		return CU32, false
 	case "CU64":
-		return CU64, nil
+		return CU64, false
 	case "CU128":
-		return CU128, nil
+		return CU128, false
 	case "CI16":
-		return CI16, nil
+		return CI16, false
 	case "CI32":
-		return CI32, nil
+		return CI32, false
 	case "CI64":
-		return CI64, nil
+		return CI64, false
 	case "CI128":
-		return CI128, nil
+		return CI128, false
 	default:
-		return 0, fmt.Errorf("Invalid dtype: %s", dtstr)
+		return 0, false
 	}
 }
 

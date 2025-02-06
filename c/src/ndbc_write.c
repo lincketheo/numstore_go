@@ -14,9 +14,7 @@
 static int handle_write_client(v_contig fmt, int client_fd); // Callback
 static void cleanup(int signum);                             // Signal Quit
 
-ndbc_ret_t
-write_server(write_args args)
-{
+ndbc_ret_t write_server(write_args args) {
   log_debug("Starting write server on port: %d\n", args.port_num);
 
   // PREDECL
@@ -37,10 +35,8 @@ write_server(write_args args)
   server_addr.sin_port = htons(args.port_num);
 
   // BIND
-  int ret = bind(
-      server_fd,
-      (struct sockaddr*)&server_addr,
-      sizeof(server_addr));
+  int ret =
+      bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
 
   if (ret == -1) {
     perror("bind");
@@ -59,10 +55,7 @@ write_server(write_args args)
 
   // DO STUFF
   // ACCEPT
-  client_fd = accept(
-      server_fd,
-      (struct sockaddr*)&client_addr,
-      &client_len);
+  client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_len);
   if (client_fd == -1) {
     perror("accept");
     goto failed_loop;
@@ -84,12 +77,11 @@ failed_loop:
   return FAILURE;
 }
 
-int handle_write_client(v_contig fmt, int client_fd)
-{
+int handle_write_client(v_contig fmt, int client_fd) {
   int ret = 0;
 
   // ALLOC
-  v_contig_mem_space s = { 0 };
+  v_contig_mem_space s = {0};
   if (v_contig_mem_space_alloc(&s, fmt)) {
     ret = -1;
     goto theend;
@@ -121,8 +113,7 @@ theend:
   return ret;
 }
 
-void cleanup(int signum)
-{
+void cleanup(int signum) {
   log_info("Shutting down write server from signal: %d\n", signum);
   exit(0);
 }

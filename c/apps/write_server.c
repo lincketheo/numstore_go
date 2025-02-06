@@ -13,58 +13,56 @@ int aifd;
 int bifd;
 int cifd;
 
-uint32_t ashape[] = { 2, 5 };
-uint32_t bshape[] = { 2 };
+uint32_t ashape[] = {2, 5};
+uint32_t bshape[] = {2};
 uint32_t cshape[] = {};
 
 var vars1[] = {
-  {
-      .shape = ashape,
-      .shapel = 2,
-      .dsize = 4,
-      .fd = 0,
-  },
-  {
-      .shape = bshape,
-      .shapel = 1,
-      .dsize = 4,
-      .fd = 0,
-  },
+    {
+        .shape = ashape,
+        .shapel = 2,
+        .dsize = 4,
+        .fd = 0,
+    },
+    {
+        .shape = bshape,
+        .shapel = 1,
+        .dsize = 4,
+        .fd = 0,
+    },
 };
 
 var vars2[] = {
-  {
-      .shape = cshape,
-      .shapel = 0,
-      .dsize = 1,
-      .fd = 0,
-  },
+    {
+        .shape = cshape,
+        .shapel = 0,
+        .dsize = 1,
+        .fd = 0,
+    },
 };
 
-v_joined joined[] = {
-  {
-      .vars = vars1,
-      .len = 2,
-  },
-  {
-      .vars = vars2,
-      .len = 1,
-  }
-};
+v_joined joined[] = {{
+                         .vars = vars1,
+                         .len = 2,
+                     },
+                     {
+                         .vars = vars2,
+                         .len = 1,
+                     }};
 
 write_args args = {
-  .port_num = 8080,
-  .fmt = {
-      .vars = joined,
-      .len = 2,
-      .samples = 5,
-      .i0 = 100,
-  },
-  .net = TCP,
+    .port_num = 8080,
+    .fmt =
+        {
+            .vars = joined,
+            .len = 2,
+            .samples = 5,
+            .i0 = 100,
+        },
+    .net = TCP,
 };
 
-void _open()
-{
+void _open() {
   afd = open("a", O_WRONLY | O_CREAT | O_TRUNC, 0644);
   bfd = open("b", O_WRONLY | O_CREAT | O_TRUNC, 0644);
   cfd = open("c", O_WRONLY | O_CREAT | O_TRUNC, 0644);
@@ -80,8 +78,7 @@ void _open()
   assert(cifd != -1);
 }
 
-void _close()
-{
+void _close() {
   close(afd);
   close(bfd);
   close(cfd);
@@ -90,8 +87,7 @@ void _close()
   close(cifd);
 }
 
-static write_args get_write_args()
-{
+static write_args get_write_args() {
   args.fmt.vars[0].vars[0].fd = afd;
   args.fmt.vars[0].vars[1].fd = bfd;
   args.fmt.vars[1].vars[0].fd = cfd;
@@ -101,8 +97,7 @@ static write_args get_write_args()
   return args;
 }
 
-int main()
-{
+int main() {
   _open();
   int ret = write_server(get_write_args());
   _close();

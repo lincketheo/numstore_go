@@ -29,7 +29,7 @@ typedef struct {
 } index_t;
 
 typedef struct {
-  uint32_t* shape; // The data type shape
+  uint32_t *shape; // The data type shape
   size_t shapel;   // The shape length
 
   size_t dsize; // The size of each element
@@ -37,8 +37,8 @@ typedef struct {
   int ifd;      // The file pointer of the index
 
   // Meaningless for write
-  //index_t* indexes; // Indexes a[1,:,1:2] -> (1, :, 1:2)
-  //size_t indlen;    // len(indexes)
+  // index_t* indexes; // Indexes a[1,:,1:2] -> (1, :, 1:2)
+  // size_t indlen;    // len(indexes)
 } var;
 
 size_t var_get_len(var a);

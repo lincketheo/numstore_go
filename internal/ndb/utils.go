@@ -3,61 +3,171 @@ package ndb
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/lincketheo/ndbgo/internal/dtypes"
 	"github.com/lincketheo/ndbgo/internal/logging"
 	"github.com/lincketheo/ndbgo/internal/utils"
 )
 
+const noRel = "norel"
+
+// /////////////////////////////// ERROR Wrappers
+func expectDbExistance(db string, shouldExist bool) error {
+	if exists, err := dbExists(db); err != nil {
+		return utils.ErrorMoref(err,
+			"Failed to check if Database: %s exists", db)
+	} else if exists && !shouldExist {
+		return fmt.Errorf("Database: %s should not exist\n", db)
+	} else if !exists && shouldExist {
+		return fmt.Errorf("Database: %s should exist\n", db)
+	}
+
+	return nil
+}
+
+func (n NDBimpl) expectDbConnection(shouldBeConnected bool) error {
+	if !n.dbConnected && shouldBeConnected {
+		return fmt.Errorf("Must be connected to a database")
+	} else if n.dbConnected && !shouldBeConnected {
+		return fmt.Errorf("Must not be connected to a database")
+	}
+
+	return nil
+}
+
+func createDBFolder(db string) error {
+	dname := dbFolderName(db)
+	if err := os.Mkdir(dname, 0755); err != nil {
+		return utils.ErrorMoref(err,
+			"Failed to create directory: %s for database: %s", dname, db)
+	}
+
+	return nil
+}
+
+func createDBNoRelFolder(db string) error {
+	dname := noRelFolderName(db, noRel)
+	if err := os.Mkdir(dname, 0755); err != nil {
+		return utils.ErrorMoref(err,
+			"Failed to create directory: %s for database: %s", dname, db)
+	}
+	return nil
+}
+
+func (n NDBimpl) expectRelExistance(rel string, shouldExist bool) error {
+	utils.ASSERT(n.dbConnected)
+
+	if exists, err := n.relExists(rel); err != nil {
+		return utils.ErrorMoref(err,
+			"Failed to check if Relation: %s exists", rel)
+	} else if exists && !shouldExist {
+		return fmt.Errorf("Relation: %s should not exist\n", rel)
+	} else if !exists && shouldExist {
+		return fmt.Errorf("Relation: %s should exist\n", rel)
+	}
+
+	return nil
+}
+
+func (n NDBimpl) expectRelConnection(shouldBeConnected bool) error {
+	if !n.relConnected && shouldBeConnected {
+		return fmt.Errorf("Must be connected to a relation")
+	} else if n.dbConnected && !shouldBeConnected {
+		return fmt.Errorf("Must not be connected to a relation")
+	}
+
+	return nil
+}
+
+func (n NDBimpl) createRelFolder(rel string) error {
+	utils.ASSERT(n.dbConnected)
+	dname := n.relFolderName(rel)
+
+	if err := os.Mkdir(dname, 0755); err != nil {
+		return utils.ErrorMoref(err,
+			"Failed to create directory: %s for relation: %s", dname, rel)
+	}
+	return nil
+}
+
+func (n NDBimpl) expectVarExistance(
+	rel string,
+	vari string,
+	shouldExist bool) error {
+
+	utils.ASSERT(n.dbConnected)
+
+	if exists, err := n.varExists(rel, vari); err != nil {
+		return utils.ErrorMoref(err,
+			"Failed to check if Variable: %s exists", rel)
+	} else if exists && !shouldExist {
+		return fmt.Errorf("Relation: %s should not exist\n", rel)
+	} else if !exists && shouldExist {
+		return fmt.Errorf("Relation: %s should exist\n", rel)
+	}
+
+	return nil
+}
+
+func (n NDBimpl) createVariFolder(rel, vari string) error {
+	utils.ASSERT(n.dbConnected)
+	dname := n.varFolderName(rel, vari)
+
+	if err := os.Mkdir(dname, 0755); err != nil {
+		return utils.ErrorMoref(err,
+			"Failed to create directory: %s for variable: %s", dname, rel)
+	}
+	return nil
+}
+
 // /////////////////////////////// PRIVATE
-// -------------------------------- DB Utils
-func dbFolderName(db string) (string, error) {
-	return utils.CombinePath(db)
+func dbFolderName(db string) string {
+	return filepath.Join(".", db)
 }
 
-// -------------------------------- Rel Utils
-func relFolderName(db, rel string) (string, error) {
-	return utils.CombinePath(db, rel)
+func noRelFolderName(db, rel string) string {
+	return filepath.Join(dbFolderName(db), rel)
 }
 
-// -------------------------------- Variable Utils
-func varFolderName(db, rel, vari string) (string, error) {
-	return utils.CombinePath(db, rel, vari)
+func (n NDBimpl) relFolderName(rel string) string {
+	utils.ASSERT(n.dbConnected)
+	return filepath.Join(dbFolderName(n.db), rel)
 }
 
-func varMetaName(db, rel, vari string) (string, error) {
-	return utils.CombinePath(db, rel, vari, "meta")
+func (n NDBimpl) varFolderName(rel, vari string) string {
+	utils.ASSERT(n.dbConnected)
+	return filepath.Join(n.relFolderName(rel), vari)
 }
 
-func varMetaExists(db, rel, vari string) (bool, error) {
-	if fname, err := varMetaName(db, rel, vari); err != nil {
-		return false, err
-	} else if exists, err := utils.FileExists(fname); err != nil {
-		return false, err
+func (n NDBimpl) varMetaFileName(rel, vari string) string {
+	utils.ASSERT(n.dbConnected)
+	return filepath.Join(n.varFolderName(rel, vari), "meta")
+}
+
+func (n NDBimpl) varMetaFileExists(rel, vari string) (bool, error) {
+	utils.ASSERT(n.dbConnected)
+	fname := n.varMetaFileName(rel, vari)
+
+	if exists, err := utils.FileExists(fname); err != nil {
+		return false, utils.ErrorContext(err)
 	} else {
-		return exists, err
+		return exists, utils.ErrorContext(err)
 	}
 }
 
-func varCreateMeta(
-	db, rel, vari string,
+func (n NDBimpl) varCreateMeta(
+	rel,
+	vari string,
 	dtype dtypes.Dtype,
 	shape []uint32,
 ) error {
+	var fname string = n.varMetaFileName(rel, vari)
 
-	var fname string
-	var err error
-
-	// Check if it already exists
-	if exists, err := varMetaExists(db, rel, vari); err != nil {
-		return utils.ErrorContext(err)
-	} else if exists {
-		return fmt.Errorf("Meta for variable: %s already exists", vari)
-	}
-
-	fname, err = varMetaName(db, rel, vari)
-	if err != nil {
-		return err
+	// Check if shape is valid
+	if !utils.CanIntBeByte(len(shape)) {
+		return fmt.Errorf("Shape is too long: %v", shape)
 	}
 
 	// Create the file and write the header
@@ -65,67 +175,55 @@ func varCreateMeta(
 	if err != nil {
 		return utils.ErrorContext(err)
 	}
-	defer fp.Close()
+	defer func() {
+		if err := fp.Close(); err != nil {
+			logging.Warn("Failed to close file: %v. Cause: %v\n", fp, err)
+		}
+	}()
 
-	if err = varWriteHeader(fp, dtype, shape); err != nil {
+	// Write DTYPE
+	if _, err := fp.Write([]byte{byte(dtype)}); err != nil {
+		return err
+	}
+
+	// Write SHAPE LEN
+	if _, err := fp.Write([]byte{byte(len(shape))}); err != nil {
+		return err
+	}
+
+	// Write SHAPE
+	sb := utils.UInt32ArrBytes(shape)
+	if _, err := fp.Write(sb); err != nil {
 		return err
 	}
 
 	return err
 }
 
-func varWriteHeader(
-	fp *os.File,
-	dtype dtypes.Dtype,
-	shape []uint32,
-) error {
-	if !utils.CanIntBeByte(len(shape)) {
-		return fmt.Errorf("Shape is too long: %v", shape)
-	}
-
-	// DTYPE
-	if _, err := fp.Write([]byte{byte(dtype)}); err != nil {
-		return err
-	}
-
-	// SHAPE LEN
-	if _, err := fp.Write([]byte{byte(len(shape))}); err != nil {
-		return err
-	}
-
-	// SHAPE
-	sb := utils.UInt32ArrBytes(shape)
-	if _, err := fp.Write(sb); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func dbExists(db string) (bool, error) {
-	if name, err := dbFolderName(db); err != nil {
-		return false, err
-	} else if exists, err := utils.DirExists(name); err != nil {
+	name := dbFolderName(db)
+
+	if exists, err := utils.DirExists(name); err != nil {
 		return false, err
 	} else {
 		return exists, nil
 	}
 }
 
-func relExists(db, rel string) (bool, error) {
-	if name, err := relFolderName(db, rel); err != nil {
-		return false, err
-	} else if exists, err := utils.DirExists(name); err != nil {
+func (n NDBimpl) relExists(rel string) (bool, error) {
+	name := n.relFolderName(rel)
+
+	if exists, err := utils.DirExists(name); err != nil {
 		return false, err
 	} else {
 		return exists, nil
 	}
 }
 
-func varExists(db, rel, vari string) (bool, error) {
-	if name, err := varFolderName(db, rel, vari); err != nil {
-		return false, err
-	} else if exists, err := utils.DirExists(name); err != nil {
+func (n NDBimpl) varExists(rel, vari string) (bool, error) {
+	name := n.varFolderName(rel, vari)
+
+	if exists, err := utils.DirExists(name); err != nil {
 		return false, err
 	} else {
 		return exists, nil
@@ -136,30 +234,20 @@ func varExists(db, rel, vari string) (bool, error) {
 func (f *NDBimpl) disconnectDb() {
 	f.dbConnected = false
 	f.relConnected = false
-	f.variConnected = false
 
 	f.db = ""
 	f.rel = ""
-	f.vari = ""
 }
 
 func (f *NDBimpl) disconnectRel() {
 	f.relConnected = false
-	f.variConnected = false
 
 	f.rel = ""
-	f.vari = ""
-}
-
-func (f *NDBimpl) disconnectVar() {
-	f.variConnected = false
-
-	f.vari = ""
 }
 
 // ///////////////////////////////// Utils
 func (f *NDBimpl) isDisconnected() bool {
-	return !f.dbConnected && !f.variConnected && !f.relConnected
+	return !f.dbConnected && !f.relConnected
 }
 
 func (f *NDBimpl) logConnectionState() {
@@ -173,7 +261,18 @@ func (f *NDBimpl) logConnectionState() {
 	if f.relConnected {
 		logging.Info("  Relation: %s\n", f.rel)
 	}
-	if f.variConnected {
-		logging.Info("  Variable: %s\n", f.vari)
+}
+
+func parseRelVarStr(rvstr string) (string, string, bool) {
+	parts := strings.Split(rvstr, ":")
+	switch len(parts) {
+	case 0:
+		panic("Unreachable")
+	case 1:
+		return "", "", false
+	case 2:
+		return parts[0], parts[1], true
+	default:
+		return "", "", false
 	}
 }

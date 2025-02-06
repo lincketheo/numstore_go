@@ -18,3 +18,9 @@ func ErrorContext(err error) error {
 		return err
 	}
 }
+
+func ErrorMoref(cause error, msg string, args ...string) error {
+	ASSERT(cause != nil)
+	msgRet := fmt.Sprintf(msg, args)
+	return fmt.Errorf(msgRet+": %w", cause)
+}

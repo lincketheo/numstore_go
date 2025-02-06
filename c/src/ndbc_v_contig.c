@@ -10,8 +10,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-size_t v_contig_get_num_vars(v_contig fmt)
-{
+size_t v_contig_get_num_vars(v_contig fmt) {
   size_t ret = 0;
   for (size_t i = 0; i < fmt.len; ++i) {
     ret += fmt.vars[i].len;
@@ -19,8 +18,7 @@ size_t v_contig_get_num_vars(v_contig fmt)
   return ret;
 }
 
-int v_contig_mem_space_alloc(v_contig_mem_space* dest, v_contig src)
-{
+int v_contig_mem_space_alloc(v_contig_mem_space *dest, v_contig src) {
   assert(dest);
   assert(!dest->raveled);
   assert(!dest->unraveled);
@@ -34,7 +32,7 @@ int v_contig_mem_space_alloc(v_contig_mem_space* dest, v_contig src)
 
   // ALLOC
   dest->unraveled = mmap(NULL, dest->blen, PROT_READ | PROT_WRITE,
-      MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+                         MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
   if (dest->unraveled == NULL) {
     perror("mmap");
     ret = -1;
@@ -42,7 +40,7 @@ int v_contig_mem_space_alloc(v_contig_mem_space* dest, v_contig src)
   }
 
   dest->raveled = mmap(NULL, dest->blen, PROT_READ | PROT_WRITE,
-      MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+                       MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
   if (dest->raveled == NULL) {
     perror("mmap");
     ret = -1;
@@ -85,8 +83,7 @@ theend:
   return ret;
 }
 
-int v_contig_mem_space_free(v_contig_mem_space* dest)
-{
+int v_contig_mem_space_free(v_contig_mem_space *dest) {
   assert(dest);
   assert(dest->raveled);
   assert(dest->unraveled);
@@ -115,10 +112,9 @@ int v_contig_mem_space_free(v_contig_mem_space* dest)
  *
  * Same algorithm as ravel except memcpy(a, b) is memcpy(b, a)
  */
-static void unravel(uint8_t* dest, const uint8_t* src, v_contig fmt)
-{
-  uint8_t* contig_offset = dest; // Offset of contig[i]
-  uint8_t* joined_offset = dest; // Offset of joined[i]
+static void unravel(uint8_t *dest, const uint8_t *src, v_contig fmt) {
+  uint8_t *contig_offset = dest; // Offset of contig[i]
+  uint8_t *joined_offset = dest; // Offset of joined[i]
 
   // For each [a, b], c in "[a, b], c"
   for (size_t j = 0; j < fmt.len; ++j) {
@@ -153,10 +149,9 @@ static void unravel(uint8_t* dest, const uint8_t* src, v_contig fmt)
  *
  * Same algorithm as unravel except memcpy(a, b) is memcpy(b, a)
  */
-static void ravel(uint8_t* dest, const uint8_t* src, v_contig fmt)
-{
-  const uint8_t* contig_offset = src; // Offset of contig[i]
-  const uint8_t* joined_offset = src; // Offset of joined[i]
+static void ravel(uint8_t *dest, const uint8_t *src, v_contig fmt) {
+  const uint8_t *contig_offset = src; // Offset of contig[i]
+  const uint8_t *joined_offset = src; // Offset of joined[i]
 
   // For each [a, b], c in "[a, b], c"
   for (size_t j = 0; j < fmt.len; ++j) {
@@ -194,15 +189,14 @@ static void ravel(uint8_t* dest, const uint8_t* src, v_contig fmt)
  * write(bifd,  [i0, i0 + 1, i0 + 2])
  * write(cifd,  [i0, i0 + 1, i0 + 2])
  */
-static int write_unraveled(v_contig_mem_space* s)
-{
+static int write_unraveled(v_contig_mem_space *s) {
   assert(s);
   assert(s->unraveled);
   assert(s->ibuffer);
   assert(s->vars);
 
   int ret = 0;
-  uint8_t* head = s->unraveled;
+  uint8_t *head = s->unraveled;
 
   // Fill Indexes with values
   for (size_t i = 0; i < s->samples; ++i) {
@@ -238,9 +232,7 @@ theend:
   return ret;
 }
 
-static int v_contig_mem_space_munmap_indexes_permissive(
-    v_contig_mem_space* s)
-{
+static int v_contig_mem_space_munmap_indexes_permissive(v_contig_mem_space *s) {
   assert(s);
 
   int ret = 0;
@@ -269,8 +261,7 @@ static int v_contig_mem_space_munmap_indexes_permissive(
   return ret;
 }
 
-static int v_contig_mem_space_mmap_indexes(v_contig_mem_space* s)
-{
+static int v_contig_mem_space_mmap_indexes(v_contig_mem_space *s) {
   assert(s);
   assert(!s->index_mmaps);
   assert(!s->index_map_lens);
@@ -296,11 +287,10 @@ static int v_contig_mem_space_mmap_indexes(v_contig_mem_space* s)
     size_t blen = st.st_size;
     s->index_map_lens[i] = blen / sizeof *s->index_mmaps[i];
 
-    log_debug("Mapping memory %zu bytes for variable: %zu fd: %d\n",
-        blen, i, s->vars[i].ifd);
-    s->index_mmaps[i] = mmap(NULL, blen,
-        PROT_READ | PROT_WRITE, MAP_PRIVATE,
-        s->vars[i].ifd, 0);
+    log_debug("Mapping memory %zu bytes for variable: %zu fd: %d\n", blen, i,
+              s->vars[i].ifd);
+    s->index_mmaps[i] = mmap(NULL, blen, PROT_READ | PROT_WRITE, MAP_PRIVATE,
+                             s->vars[i].ifd, 0);
     if (s->index_mmaps[i] == MAP_FAILED) {
       perror("mmap");
       goto failed;
@@ -318,13 +308,12 @@ failed:
 /**
  * Finds shared indexes in index arrays with limit
  */
-static int index_find_shared(
-    size_t* dest,     // output array
-    size_t* dlen,     // final count
-    size_t** indexes, // list of sorted arrays
-    size_t* ilens,    // length of each array
-    size_t len,       // number of arrays
-    size_t limit)     // maximum results
+static int index_find_shared(size_t *dest,     // output array
+                             size_t *dlen,     // final count
+                             size_t **indexes, // list of sorted arrays
+                             size_t *ilens,    // length of each array
+                             size_t len,       // number of arrays
+                             size_t limit)     // maximum results
 {
   size_t count = 0;
   size_t pos[64]; // or dynamically allocated if len > 64
@@ -396,8 +385,7 @@ done:
   return 0;
 }
 
-static ssize_t argfind(size_t* indexes, size_t ilen, size_t find)
-{
+static ssize_t argfind(size_t *indexes, size_t ilen, size_t find) {
   size_t left = 0, right = ilen;
 
   while (left < right) {
@@ -414,8 +402,7 @@ static ssize_t argfind(size_t* indexes, size_t ilen, size_t find)
   return -1;
 }
 
-static int read_unraveled(v_contig_mem_space* s)
-{
+static int read_unraveled(v_contig_mem_space *s) {
   assert(s);
   assert(s->unraveled);
   assert(s->ibuffer);
@@ -430,13 +417,8 @@ static int read_unraveled(v_contig_mem_space* s)
   }
 
   // Fill size buffer with shared indexes
-  if (index_find_shared(
-          s->ibuffer,
-          &s->ibuflen,
-          s->index_mmaps,
-          s->index_map_lens,
-          s->num_vars,
-          s->samples)) {
+  if (index_find_shared(s->ibuffer, &s->ibuflen, s->index_mmaps,
+                        s->index_map_lens, s->num_vars, s->samples)) {
     ret = -1;
     goto theend;
   }
@@ -448,7 +430,7 @@ static int read_unraveled(v_contig_mem_space* s)
     }
   }
 
-  uint8_t* head = s->unraveled;
+  uint8_t *head = s->unraveled;
   for (size_t i = 0; i < s->num_vars; ++i) {
     for (size_t j = 0; j < s->ibuflen; ++j) {
       var _var = s->vars[i];
@@ -456,10 +438,8 @@ static int read_unraveled(v_contig_mem_space* s)
 
       // FIND OFFSET
       size_t index = s->ibuffer[j];
-      ssize_t var_index = argfind(
-          s->index_mmaps[i],
-          s->index_map_lens[i],
-          index);
+      ssize_t var_index =
+          argfind(s->index_mmaps[i], s->index_map_lens[i], index);
       assert(var_index != -1);
 
       // READ
@@ -481,8 +461,7 @@ theend:
   return ret;
 }
 
-int v_contig_write(v_contig_mem_space* s, v_contig fmt)
-{
+int v_contig_write(v_contig_mem_space *s, v_contig fmt) {
   int ret = 0;
 
   // UNRAVEL
@@ -496,8 +475,7 @@ int v_contig_write(v_contig_mem_space* s, v_contig fmt)
   return 0;
 }
 
-int v_contig_read(v_contig_mem_space* s, v_contig fmt)
-{
+int v_contig_read(v_contig_mem_space *s, v_contig fmt) {
   int ret = 0;
 
   // READ
@@ -511,8 +489,7 @@ int v_contig_read(v_contig_mem_space* s, v_contig fmt)
   return 0;
 }
 
-size_t v_joined_blen(v_joined v)
-{
+size_t v_joined_blen(v_joined v) {
   size_t ret = 0;
   for (size_t i = 0; i < v.len; ++i) {
     ret += var_get_blen(v.vars[i]);
@@ -520,8 +497,7 @@ size_t v_joined_blen(v_joined v)
   return ret;
 }
 
-size_t v_contig_blen(v_contig v)
-{
+size_t v_contig_blen(v_contig v) {
   size_t ret = 0;
   for (size_t i = 0; i < v.len; ++i) {
     ret += v_joined_blen(v.vars[i]);

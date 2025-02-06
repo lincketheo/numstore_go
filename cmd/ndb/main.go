@@ -1,29 +1,49 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"os"
 
-	"github.com/lincketheo/ndbgo/internal/logging"
-	"github.com/lincketheo/ndbgo/internal/ndb"
-	"github.com/lincketheo/ndbgo/internal/repl"
-	"github.com/lincketheo/ndbgo/internal/usecases"
+	"github.com/lincketheo/ndbgo/internal/bytecode"
 )
 
-func main() {
-	var _n ndb.NDBimpl
-	var n usecases.NDB = &_n
+func printHelp() {
+	fmt.Printf(
+		`Usage: %s [SCRIPT]
+    If a database name is provided, 
+    create or connect to the specified database.
+    If no database name is provided, 
+    you'll need to connect to the database yourself
 
-	if len(os.Args) > 2 {
-		logging.Error("Usage: %s [DB]:[REL]:[VAR]\n", os.Args[0])
+Options:
+`, os.Args[0])
+	flag.PrintDefaults()
+}
+
+func main() {
+	help := flag.Bool("help", false, "Show this help message")
+	scanout := flag.String(
+		"sout",
+		"",
+		"Specify the output file of the scanning process")
+
+	flag.Usage = printHelp
+	flag.Parse()
+
+	if *help {
+		printHelp()
 		return
 	}
 
-	arg := ""
-	if len(os.Args) == 2 {
-		arg = os.Args[1]
+	rest := flag.Args()
+	if len(rest) != 1 {
+		fmt.Println("Must provide one input file\n")
+		return
 	}
 
-	if err := repl.RunREPL(arg, &n); err != nil {
-		logging.Error("%v", err)
+	if len(*scanout) > 0 {
+		tokens := bytecode.Scan(rest[0])
+		fmt.Println(tokens)
 	}
 }

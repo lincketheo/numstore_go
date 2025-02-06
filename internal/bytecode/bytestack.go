@@ -1,106 +1,126 @@
 package bytecode
 
 import (
-	"fmt"
-
+	"github.com/lincketheo/ndbgo/internal/dtypes"
+	"github.com/lincketheo/ndbgo/internal/logging"
 	"github.com/lincketheo/ndbgo/internal/utils"
 )
 
-type ByteStack struct {
-	data []byte
-	ip   int
+type byteStack struct {
+	data    []byte
+	ip      int
+	isError bool
+}
+
+func createByteStack() byteStack {
+	data := make([]byte, 0, 20)
+	return byteStack{
+		data:    data,
+		ip:      0,
+		isError: false,
+	}
 }
 
 // ////////////////////////////////////// Utilities
-func CreateByteStack() ByteStack {
-	data := make([]byte, 0, 20)
-	return ByteStack{data, 0}
-}
-
-func (c ByteStack) head() []byte {
+func (c byteStack) head() []byte {
 	return c.data[c.ip:]
 }
 
-func (c ByteStack) hasNLeft(n int) bool {
+func (c byteStack) hasNLeft(n int) bool {
 	return len(c.data)-c.ip >= n
 }
 
-func (c ByteStack) empty() bool {
+func (c byteStack) isEnd() bool {
 	return c.ip == len(c.data)
 }
 
-// ////////////////////////////////////// POP
-func (c *ByteStack) popByte() (byte, error) {
-	if c.empty() {
-		return 0, fmt.Errorf("Popping byte but there are no bytes left")
-	}
+func (c *byteStack) compileError(fmt string, args ...any) {
+	logging.Error(fmt, args)
+	c.pushByteCode(BC_ERROR)
+}
+
+// ////////////////////////////////////// ADVANCE
+func (c *byteStack) nextByte() byte {
+	utils.ASSERT(!c.isEnd())
 	ret := c.data[c.ip]
 	c.ip++
-	return ret, nil
+	return ret
 }
 
-func (c *ByteStack) popByteExpect(b byte) error {
-	if ret, err := c.popByte(); err != nil {
-		return utils.ErrorContext(err)
-	} else if ret != b {
-		return fmt.Errorf(`Popping byte expected byte:
-      %v but popped byte was: %v`, b, ret)
-	} else {
-		return nil
-	}
-}
-
-func (c *ByteStack) popBytes(n int) ([]byte, error) {
+func (c *byteStack) nextBytes(n int) ([]byte, bool) {
 	ret := c.head()[0:n]
+
 	if len(ret) != n {
-		return nil, fmt.Errorf(`Popping %d bytes left
-      but had %d leftover bytes`, n, len(ret))
+		return nil, false
 	}
 
 	c.ip += n
-	return ret, nil
+	return ret, true
 }
 
-// ////////////////////////////////////// PEEK
-func (c *ByteStack) peekByte() (byte, bool) {
-	if c.empty() {
-		return 0, false
-	}
-	return c.data[c.ip], true
+func (c *byteStack) nextByteCode() (bytecode, bool) {
+	return byteToBytecode(c.nextByte())
 }
 
-func (c *ByteStack) peekByteExpect(o byte) error {
-	if ret, ok := c.peekByte(); !ok {
-		return fmt.Errorf(`Peeking byte expected byte:
-      %v but stack is empty`, o)
-	} else if ret != o {
-		return fmt.Errorf(`Peeking byte expected byte:
-      %v but peeked byte was: %v`, o, ret)
+func (c *byteStack) nextString() (string, bool) {
+	if ret, ok := c.nextBytes(int(c.nextByte())); !ok {
+		return "", ok
 	} else {
-		return nil
+		return string(ret), true
 	}
 }
 
-func (c *ByteStack) peekByteCheck(o byte) bool {
-	if ret, ok := c.peekByte(); !ok {
-		return false
+func (c *byteStack) nextUint32Arr() ([]uint32, bool) {
+	if ret, ok := c.nextBytes(int(c.nextByte()) * 4); !ok {
+		return nil, ok
 	} else {
-		return ret == o
+		return utils.BytesToUInt32Arr(ret), true
 	}
 }
 
-func (c *ByteStack) peekBytes(n int) ([]byte, bool) {
-	if c.hasNLeft(n) {
-		return c.data[c.ip : c.ip+n], true
-	}
-	return nil, false
+func (c *byteStack) nextDtype() (dtypes.Dtype, bool) {
+	return dtypes.ByteToDtype(c.nextByte())
 }
 
 // ////////////////////////////////////// PUSH
-func (c *ByteStack) pushByte(b byte) {
+func (c *byteStack) pushByte(b byte) {
 	c.data = append(c.data, b)
 }
 
-func (c *ByteStack) pushBytes(data []byte) {
+func (c *byteStack) pushBytes(data []byte) {
 	c.data = append(c.data, data...)
+}
+
+func (c *byteStack) pushByteCode(b bytecode) {
+	c.pushByte(byte(b))
+}
+
+func (c *byteStack) pushStr(data string) {
+	prefix := len(data)
+
+	// String is too long
+	if !utils.CanIntBeByte(prefix) {
+		c.compileError("String of length: %d is too long\n", prefix)
+		return
+	}
+
+	c.pushByte(byte(prefix))
+	c.pushBytes([]byte(data))
+}
+
+func (c *byteStack) pushUint32Arr(s []uint32) {
+	prefix := len(s)
+
+	if !utils.CanIntBeByte(prefix) {
+		c.compileError("Shape is too long: %v", s)
+		return
+	}
+
+	sb := utils.UInt32ArrBytes(s)
+	c.pushByte(byte(prefix))
+	c.pushBytes(sb)
+}
+
+func (c *byteStack) pushDtype(d dtypes.Dtype) {
+	c.pushByte(byte(d))
 }

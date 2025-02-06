@@ -30,12 +30,12 @@
  */
 
 //// SHAPES
-uint32_t ashape[] = { 2, 5 };
-uint32_t bshape[] = { 2 };
+uint32_t ashape[] = {2, 5};
+uint32_t bshape[] = {2};
 uint32_t cshape[] = {};
-uint32_t dshape[] = { 9, 10 };
-uint32_t eshape[] = { 9 };
-uint32_t fshape[] = { 2, 6 };
+uint32_t dshape[] = {9, 10};
+uint32_t eshape[] = {9};
+uint32_t fshape[] = {2, 6};
 
 //// TYPES
 #define atype float
@@ -58,7 +58,8 @@ size_t len = 0;
 #define aprint(i) printf("a[%zu] = %f\n", i, avals[i])
 #define bprint(i) printf("a[%zu] = %d\n", i, bvals[i])
 #define cprint(i) printf("a[%zu] = %c\n", i, cvals[i])
-#define dprint(i) printf("a[%zu] = %f %f\n", i, creal(dvals[i]), cimag(dvals[i]))
+#define dprint(i)                                                              \
+  printf("a[%zu] = %f %f\n", i, creal(dvals[i]), cimag(dvals[i]))
 #define eprint(i) printf("a[%zu] = %zu\n", i, evals[i])
 #define fprint(i) printf("a[%zu] = %u\n", i, fvals[i])
 
@@ -71,60 +72,60 @@ size_t len = 0;
 #define _drand() (float_rand() + I * float_rand())
 #define _erand() ((etype)float_rand())
 #define _frand() ((ftype)float_rand())
-#define _rand(var, len0)                            \
-  ({                                                \
-    var##type* _head = (var##type*)head;            \
-    size_t _len = (len0)*var_get_len(var);          \
-    for (size_t i = 0; i < var_get_len(var); ++i) { \
-      var##type temp = _##var##rand();              \
-      var##vals[_len++] = temp;                     \
-      *_head++ = temp;                              \
-    }                                               \
-    (uint8_t*)_head;                                \
+#define _rand(var, len0)                                                       \
+  ({                                                                           \
+    var##type *_head = (var##type *)head;                                      \
+    size_t _len = (len0)*var_get_len(var);                                     \
+    for (size_t i = 0; i < var_get_len(var); ++i) {                            \
+      var##type temp = _##var##rand();                                         \
+      var##vals[_len++] = temp;                                                \
+      *_head++ = temp;                                                         \
+    }                                                                          \
+    (uint8_t *)_head;                                                          \
   })
 
 //// THE ACTUAL VARS
 var a = {
-  .shape = ashape,
-  .shapel = sizeof(ashape) / sizeof *ashape,
-  .dsize = sizeof(atype),
-  .fd = 0,
-  .ifd = 0,
+    .shape = ashape,
+    .shapel = sizeof(ashape) / sizeof *ashape,
+    .dsize = sizeof(atype),
+    .fd = 0,
+    .ifd = 0,
 };
 var b = {
-  .shape = bshape,
-  .shapel = sizeof(bshape) / sizeof *bshape,
-  .dsize = sizeof(btype),
-  .fd = 0,
-  .ifd = 0,
+    .shape = bshape,
+    .shapel = sizeof(bshape) / sizeof *bshape,
+    .dsize = sizeof(btype),
+    .fd = 0,
+    .ifd = 0,
 };
 var c = {
-  .shape = cshape,
-  .shapel = sizeof(cshape) / sizeof *cshape,
-  .dsize = sizeof(ctype),
-  .fd = 0,
-  .ifd = 0,
+    .shape = cshape,
+    .shapel = sizeof(cshape) / sizeof *cshape,
+    .dsize = sizeof(ctype),
+    .fd = 0,
+    .ifd = 0,
 };
 var d = {
-  .shape = dshape,
-  .shapel = sizeof(dshape) / sizeof *dshape,
-  .dsize = sizeof(dtype),
-  .fd = 0,
-  .ifd = 0,
+    .shape = dshape,
+    .shapel = sizeof(dshape) / sizeof *dshape,
+    .dsize = sizeof(dtype),
+    .fd = 0,
+    .ifd = 0,
 };
 var e = {
-  .shape = eshape,
-  .shapel = sizeof(eshape) / sizeof *eshape,
-  .dsize = sizeof(etype),
-  .fd = 0,
-  .ifd = 0,
+    .shape = eshape,
+    .shapel = sizeof(eshape) / sizeof *eshape,
+    .dsize = sizeof(etype),
+    .fd = 0,
+    .ifd = 0,
 };
 var f = {
-  .shape = fshape,
-  .shapel = sizeof(fshape) / sizeof *fshape,
-  .dsize = sizeof(ftype),
-  .fd = 0,
-  .ifd = 0,
+    .shape = fshape,
+    .shapel = sizeof(fshape) / sizeof *fshape,
+    .dsize = sizeof(ftype),
+    .fd = 0,
+    .ifd = 0,
 };
 
 /////////////////////////////////// V_GET_CONTIG FUNCTIONS
@@ -138,8 +139,7 @@ v_joined joined1[2];
 /**
  * 5 x ([a, b] c)
  */
-v_contig get_v_contig1()
-{
+v_contig get_v_contig1() {
   vars11[0] = a;
   vars11[1] = b;
   vars12[0] = c;
@@ -150,16 +150,15 @@ v_contig get_v_contig1()
   joined1[1].len = 1;
 
   v_contig ret = {
-    .vars = joined1,
-    .len = 2,
-    .samples = 5,
-    .i0 = 0,
+      .vars = joined1,
+      .len = 2,
+      .samples = 5,
+      .i0 = 0,
   };
   return ret;
 }
 
-uint8_t* malloc_data_for_write_1(uint32_t seed, size_t* blen)
-{
+uint8_t *malloc_data_for_write_1(uint32_t seed, size_t *blen) {
   srand(seed);
   int samples = 5;
 
@@ -168,8 +167,8 @@ uint8_t* malloc_data_for_write_1(uint32_t seed, size_t* blen)
   *blen += samples * var_get_blen(c);
   assert(*blen == 245);
 
-  uint8_t* ret = malloc_or_abort(*blen);
-  uint8_t* head = ret;
+  uint8_t *ret = malloc_or_abort(*blen);
+  uint8_t *head = ret;
 
   for (int i = 0; i < samples; i++) {
     head = _rand(a, len + i);
@@ -193,8 +192,7 @@ v_joined joined2[3];
 /**
  * 10 x ([c, b, d] e [a, f])
  */
-v_contig get_v_contig2()
-{
+v_contig get_v_contig2() {
   vars21[0] = c;
   vars21[1] = b;
   vars21[2] = d;
@@ -209,29 +207,29 @@ v_contig get_v_contig2()
   joined2[2].len = 2;
 
   v_contig ret = {
-    .vars = (v_joined[]) {
-        {
-            .vars = (var[]) { c, b, d },
-            .len = 3,
-        },
-        {
-            .vars = (var[]) { e },
-            .len = 1,
-        },
-        {
-            .vars = (var[]) { a, f },
-            .len = 1,
-        },
-    },
-    .len = 3,
-    .samples = 10,
-    .i0 = 0,
+      .vars =
+          (v_joined[]){
+              {
+                  .vars = (var[]){c, b, d},
+                  .len = 3,
+              },
+              {
+                  .vars = (var[]){e},
+                  .len = 1,
+              },
+              {
+                  .vars = (var[]){a, f},
+                  .len = 1,
+              },
+          },
+      .len = 3,
+      .samples = 10,
+      .i0 = 0,
   };
   return ret;
 }
 
-uint8_t* malloc_data_for_write_2(uint32_t seed, size_t* blen)
-{
+uint8_t *malloc_data_for_write_2(uint32_t seed, size_t *blen) {
   srand(seed);
   int samples = 10;
 
@@ -242,8 +240,8 @@ uint8_t* malloc_data_for_write_2(uint32_t seed, size_t* blen)
   *blen += samples * var_get_blen(a);
   *blen += samples * var_get_blen(f);
 
-  uint8_t* ret = malloc_or_abort(*blen);
-  uint8_t* head = ret;
+  uint8_t *ret = malloc_or_abort(*blen);
+  uint8_t *head = ret;
 
   for (int i = 0; i < samples; i++) {
     head = _rand(c, len + i);
@@ -272,8 +270,7 @@ v_joined joined3[2];
 /**
  * 30 x ([c, f] [b, a])
  */
-v_contig get_v_contig3()
-{
+v_contig get_v_contig3() {
   vars31[0] = c;
   vars31[1] = f;
   vars32[0] = b;
@@ -284,16 +281,15 @@ v_contig get_v_contig3()
   joined3[1].len = 2;
 
   v_contig ret = {
-    .vars = joined3,
-    .len = 2,
-    .samples = 30,
-    .i0 = 0,
+      .vars = joined3,
+      .len = 2,
+      .samples = 30,
+      .i0 = 0,
   };
   return ret;
 }
 
-uint8_t* malloc_data_for_write_3(uint32_t seed, size_t* blen)
-{
+uint8_t *malloc_data_for_write_3(uint32_t seed, size_t *blen) {
   srand(seed);
   int samples = 30;
 
@@ -302,8 +298,8 @@ uint8_t* malloc_data_for_write_3(uint32_t seed, size_t* blen)
   *blen += samples * var_get_blen(b);
   *blen += samples * var_get_blen(a);
 
-  uint8_t* ret = malloc_or_abort(*blen);
-  uint8_t* head = ret;
+  uint8_t *ret = malloc_or_abort(*blen);
+  uint8_t *head = ret;
 
   for (int i = 0; i < samples; i++) {
     head = _rand(c, len + i);
@@ -327,8 +323,7 @@ v_joined joined4[2];
 /**
  * 3 x (b, [c, a])
  */
-v_contig get_v_contig4()
-{
+v_contig get_v_contig4() {
   vars41[0] = b;
   vars42[0] = c;
   vars42[1] = a;
@@ -339,31 +334,29 @@ v_contig get_v_contig4()
   joined4[1].len = 2;
 
   v_contig ret = {
-    .vars = joined4,
-    .len = 2,
-    .samples = 3,
-    .i0 = 0,
+      .vars = joined4,
+      .len = 2,
+      .samples = 3,
+      .i0 = 0,
   };
   return ret;
 }
 
-size_t blen_4(size_t samples)
-{
+size_t blen_4(size_t samples) {
   size_t blen = samples * var_get_blen(a);
   blen += samples * var_get_blen(b);
   blen += samples * var_get_blen(c);
   return blen;
 }
 
-uint8_t* malloc_data_for_write_4(uint32_t seed, size_t* blen)
-{
+uint8_t *malloc_data_for_write_4(uint32_t seed, size_t *blen) {
   srand(seed);
   int samples = 3;
 
   *blen = blen_4(samples);
 
-  uint8_t* ret = malloc_or_abort(*blen);
-  uint8_t* head = ret;
+  uint8_t *ret = malloc_or_abort(*blen);
+  uint8_t *head = ret;
 
   for (int i = 0; i < samples; i++) {
     head = _rand(b, len + i);
@@ -378,16 +371,14 @@ uint8_t* malloc_data_for_write_4(uint32_t seed, size_t* blen)
   return ret;
 }
 
-uint8_t* malloc_data_for_read_4(size_t* blen)
-{
+uint8_t *malloc_data_for_read_4(size_t *blen) {
   int samples = 3;
   *blen = blen_4(samples);
   return calloc_or_abort(*blen, 1);
 }
 
 ///////////////////////////////////////// OPEN
-void _open()
-{
+void _open() {
   rm_rf("tests");
   mkdir_or_abort("tests", 0744);
   a.fd = open_or_abort("tests/a.fd", O_RDWR | O_CREAT | O_TRUNC, 0644);
@@ -406,8 +397,7 @@ void _open()
 }
 
 ///////////////////////////////////////// CLOSE ALL FDs
-void _rewind()
-{
+void _rewind() {
   lseek(a.fd, 0, SEEK_SET);
   lseek(b.fd, 0, SEEK_SET);
   lseek(c.fd, 0, SEEK_SET);
@@ -424,8 +414,7 @@ void _rewind()
 }
 
 ///////////////////////////////////////// CLOSE ALL FDs
-void _close()
-{
+void _close() {
   close_wrap(a.fd);
   close_wrap(b.fd);
   close_wrap(c.fd);
@@ -442,25 +431,22 @@ void _close()
 }
 
 ///////////////////////////////////////// SERVER THREAD
-void* server_write_thread(void* arg)
-{
-  write_args* wargs = arg;
-  int* ret = malloc(sizeof *ret);
+void *server_write_thread(void *arg) {
+  write_args *wargs = arg;
+  int *ret = malloc(sizeof *ret);
   *ret = write_server(*wargs);
   return ret;
 }
 
-void* server_read_thread(void* arg)
-{
-  read_args* rargs = arg;
-  int* ret = malloc(sizeof *ret);
+void *server_read_thread(void *arg) {
+  read_args *rargs = arg;
+  int *ret = malloc(sizeof *ret);
   *ret = read_server(*rargs);
   return ret;
 }
 
 ///////////////////////////////////////// CLIENT ACTION
-void client_write_data(uint8_t* data, size_t dlen, int port)
-{
+void client_write_data(uint8_t *data, size_t dlen, int port) {
   int sock;
   struct sockaddr_in server_addr;
 
@@ -479,10 +465,7 @@ void client_write_data(uint8_t* data, size_t dlen, int port)
   }
 
   // CONNECT
-  ret = connect(
-      sock,
-      (struct sockaddr*)&server_addr,
-      sizeof(server_addr));
+  ret = connect(sock, (struct sockaddr *)&server_addr, sizeof(server_addr));
 
   if (ret == -1) {
     perror("connect");
@@ -499,8 +482,7 @@ void client_write_data(uint8_t* data, size_t dlen, int port)
   close(sock);
 }
 
-void client_read_data(uint8_t* dest, size_t dlen, int port)
-{
+void client_read_data(uint8_t *dest, size_t dlen, int port) {
   int sock;
   struct sockaddr_in server_addr;
 
@@ -519,10 +501,7 @@ void client_read_data(uint8_t* dest, size_t dlen, int port)
   }
 
   // CONNECT
-  ret = connect(
-      sock,
-      (struct sockaddr*)&server_addr,
-      sizeof(server_addr));
+  ret = connect(sock, (struct sockaddr *)&server_addr, sizeof(server_addr));
 
   if (ret == -1) {
     perror("connect");
@@ -539,10 +518,9 @@ void client_read_data(uint8_t* dest, size_t dlen, int port)
   close(sock);
 }
 
-int main()
-{
+int main() {
   // Return value from threads
-  int* _ret;
+  int *_ret;
   int ret = 0;
 
   // First, open all files
@@ -550,15 +528,15 @@ int main()
 
   // Allocate memory buffers
   size_t wdlen1, rdlen4;
-  uint8_t* wdata1 = malloc_data_for_write_1(1234, &wdlen1);
-  uint8_t* rdata4 = malloc_data_for_read_4(&rdlen4);
+  uint8_t *wdata1 = malloc_data_for_write_1(1234, &wdlen1);
+  uint8_t *rdata4 = malloc_data_for_read_4(&rdlen4);
 
   // Create the server write thread
   pthread_t thread_id;
   write_args args = {
-    .fmt = get_v_contig1(),
-    .net = TCP,
-    .port_num = 8080,
+      .fmt = get_v_contig1(),
+      .net = TCP,
+      .port_num = 8080,
   };
   if (pthread_create(&thread_id, NULL, server_write_thread, &args) != 0) {
     perror("pthread_create");
@@ -572,7 +550,7 @@ int main()
   client_write_data(wdata1, wdlen1, 8080);
 
   // Join the server thread
-  pthread_join(thread_id, (void**)&_ret);
+  pthread_join(thread_id, (void **)&_ret);
   ret = ret | *_ret;
 
   // Rewind all file pointers to the start
@@ -580,9 +558,9 @@ int main()
 
   // Create the server read thread
   read_args rargs = {
-    .fmt = get_v_contig4(),
-    .net = TCP,
-    .port_num = 8081,
+      .fmt = get_v_contig4(),
+      .net = TCP,
+      .port_num = 8081,
   };
   if (pthread_create(&thread_id, NULL, server_read_thread, &rargs) != 0) {
     perror("pthread_create");
@@ -596,7 +574,7 @@ int main()
   client_read_data(rdata4, rdlen4, 8081);
 
   // Join the server thread
-  pthread_join(thread_id, (void**)&_ret);
+  pthread_join(thread_id, (void **)&_ret);
   ret = ret | *_ret;
 
   // Free data
