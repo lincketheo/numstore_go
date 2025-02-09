@@ -1,6 +1,8 @@
 package bytecode
 
 import (
+	"fmt"
+
 	"github.com/lincketheo/ndbgo/internal/logging"
 	"github.com/lincketheo/ndbgo/internal/utils"
 )
@@ -23,6 +25,7 @@ func Scan(data string) []token {
 			continue
 		}
 		ret = append(ret, tok)
+		fmt.Println(tok.ttype, tok.value)
 		if tok.ttype == TOK_EOF {
 			break
 		}
@@ -71,8 +74,6 @@ func (s *scanner) scanNextToken() token {
 }
 
 func (s *scanner) scanNextTokenType() tokenType {
-	utils.ASSERT(!s.isEnd())
-
 	s.skipWhitespace()
 	s.start = s.current
 
@@ -95,14 +96,14 @@ func (s *scanner) scanNextTokenType() tokenType {
 		return TOK_COMMA
 	case ':':
 		return TOK_COLON
-	//case '+':
-	//		return TOK_PLUS
-	//	case '-':
-	//		return TOK_MINUS
-	//	case '/':
-	//		return TOK_DIV
-	//	case '*':
-	//		return TOK_MULT
+	case '+':
+		return TOK_PLUS
+	case '-':
+		return TOK_MINUS
+	case '/':
+		return TOK_DIV
+	case '*':
+		return TOK_MULT
 	case '#':
 		{
 			for !s.isEnd() && s.peekChar() != '\n' {
@@ -120,7 +121,7 @@ func (s *scanner) scanNextTokenType() tokenType {
 				return s.parseIdent()
 			}
 
-			s.compileError("Unexpected char: %d\n", c)
+			s.compileError("Unexpected char: %c\n", c)
 			return TOK_NONE
 		}
 	}
@@ -165,8 +166,8 @@ func (s *scanner) checkKeyword() tokenType {
 		return TOK_ASC
 	case "desc":
 		return TOK_DESC
-	//case "I":
-	//return TOK_I
+	case "I":
+		return TOK_I
 	default:
 		return TOK_NONE
 	}

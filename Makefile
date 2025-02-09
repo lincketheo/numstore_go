@@ -5,15 +5,11 @@ AR := ar rcs
 
 # Source Files
 GO_SRC := $(shell find . -name "*.go")
-NDBC_SRC := $(wildcard ./c/*.c)
-NDBC_OBJ := $(NDBC_SRC:.c=.o)
-NDBC_LIB := libndbc.a
+NDBC_LIB := c/libndbc.a
 
 # Binaries
 CMD_DIRS := $(shell find cmd -mindepth 1 -maxdepth 1 -type d)
 BINARIES := $(notdir $(CMD_DIRS))
-
-.PHONY: all clean lint format
 
 all: $(BINARIES)
 
@@ -22,12 +18,8 @@ $(BINARIES): %: $(GO_SRC) $(NDBC_LIB)
 	go build -gcflags "all=-N -l" -o $@ ./cmd/$@
 
 # Build static library
-$(NDBC_LIB): $(NDBC_OBJ)
-	$(AR) $@ $^
-
-# Compile C source files
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+$(NDBC_LIB):
+	$(MAKE) -C c
 
 # Linting rule
 lint:
@@ -41,4 +33,4 @@ format:
 # Clean rule
 clean:
 	rm -f $(BINARIES) $(NDBC_LIB) $(NDBC_OBJ)
-
+	$(MAKE) -C c clean

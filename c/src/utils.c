@@ -31,7 +31,7 @@ int open_or_abort(const char *fname, int oflag, ...) {
   if (oflag & O_CREAT) {
     va_list args;
     va_start(args, oflag);
-    mode_t mode = va_arg(args, mode_t);
+    mode_t mode = va_arg(args, int);
     va_end(args);
 
     fd = open(fname, oflag, mode);

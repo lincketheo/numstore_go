@@ -1,9 +1,0 @@
-// CLI
-// Create a database
-ndb create db foo
-
-// Create a relation
-ndb create rel foo.bar
-
-// Create a variable
-ndb create var foo.bar.a

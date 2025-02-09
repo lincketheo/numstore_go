@@ -13,6 +13,5 @@ func main() {
   `
 
 	fmt.Println(cmd)
-
 	bytecode.Compile(cmd)
 }

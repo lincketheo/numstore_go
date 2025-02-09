@@ -1,11 +1,50 @@
 package bytecode
 
+import (
+	"bufio"
+	"os"
+	"strconv"
+
+	"github.com/lincketheo/ndbgo/internal/logging"
+	"github.com/lincketheo/ndbgo/internal/utils"
+)
+
 type tokenType int
 
 type token struct {
 	ttype tokenType
 	value string
 	line  int
+}
+
+func WriteTokensToFileClean(fname string, tokens []token) error {
+	file, err := os.Create(fname)
+	if err != nil {
+		return utils.ErrorMoref(err, "Trying to write tokens to files")
+	}
+	defer func() {
+    if err := file.Close(); err != nil {
+      logging.Warn("Failed to close file: %s. %v\n", fname, err)
+    }
+  }()
+
+	writer := bufio.NewWriter(file)
+
+	for i, t := range tokens {
+		if _, err := writer.WriteString(
+			strconv.Itoa(t.line) +
+				" " + t.ttype.String() +
+				" " + t.value + "\n",
+		); err != nil {
+			return utils.ErrorMoref(err, "Writing token: %d on line: %d\n", i, t.line)
+		}
+	}
+
+  if err := writer.Flush(); err != nil {
+    logging.Warn("Failed to flush file: %s. %v\n", fname, err)
+  }
+
+	return nil
 }
 
 const (
@@ -21,7 +60,7 @@ const (
 	TOK_DATABASE
 	TOK_RELATION
 	TOK_VARIABLE
-	//TOK_I
+	TOK_I
 
 	// Options for read / write
 	TOK_VALUES
@@ -42,10 +81,10 @@ const (
 	TOK_NUMBER
 
 	// Expressions (for the future)
-	//TOK_PLUS // For complex
-	//TOK_MINUS
-	//TOK_MULT
-	//TOK_DIV
+	TOK_PLUS // For complex
+	TOK_MINUS
+	TOK_MULT
+	TOK_DIV
 
 	// Other
 	TOK_IDENTIFIER
@@ -75,8 +114,8 @@ func (t tokenType) String() string {
 		return "TOK_RELATION"
 	case TOK_VARIABLE:
 		return "TOK_VARIABLE"
-	//case TOK_I:
-	//	return "TOK_I"
+	case TOK_I:
+		return "TOK_I"
 
 	// Options for read / write
 	case TOK_VALUES:
@@ -109,14 +148,14 @@ func (t tokenType) String() string {
 		return "TOK_NUMBER"
 
 	// Expressions
-	//case TOK_PLUS:
-	//		return "TOK_PLUS"
-	//case TOK_MINUS:
-	//		return "TOK_MINUS"
-	//case TOK_MULT:
-	//		return "TOK_MULT"
-	//case TOK_DIV:
-	//		return "TOK_DIV"
+	case TOK_PLUS:
+		return "TOK_PLUS"
+	case TOK_MINUS:
+		return "TOK_MINUS"
+	case TOK_MULT:
+		return "TOK_MULT"
+	case TOK_DIV:
+		return "TOK_DIV"
 
 	// Other
 	case TOK_IDENTIFIER:
