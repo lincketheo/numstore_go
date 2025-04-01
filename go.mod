@@ -1,7 +1,3 @@
-module github.com/lincketheo/ndbgo
+module github.com/lincketheo/numstore
 
-go 1.23.5
-
-require (
-	github.com/chzyer/readline v1.5.1 // indirect
-)
+go 1.23.6

@@ -1,17 +1,11 @@
 package utils
 
-import (
-	"github.com/lincketheo/ndbgo/internal/config"
-)
+const enableAsserts = true
 
-func ASSERT(expr bool) {
-	if config.Debug {
-		if !expr {
-			panic("Assertion failed")
+func Assert(cond bool) {
+	if enableAsserts {
+		if !cond {
+			panic("Assertion failed!")
 		}
 	}
-}
-
-func UNREACHABLE() {
-	panic("Unreachable code reached")
 }

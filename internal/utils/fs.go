@@ -1,27 +1,13 @@
 package utils
 
-import (
-	"os"
-)
+import "os"
 
-func DirExists(path string) (bool, error) {
-	info, err := os.Stat(path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return false, nil
-		}
-		return false, ErrorContext(err)
+func FileExists(name string) (os.FileInfo, error) {
+	if info, err := os.Stat(name); err != nil && os.IsNotExist(err) {
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	} else {
+		return info, nil
 	}
-	return info.IsDir(), nil
-}
-
-func FileExists(path string) (bool, error) {
-	info, err := os.Stat(path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return false, nil
-		}
-		return false, ErrorContext(err)
-	}
-	return !info.IsDir(), nil
 }
