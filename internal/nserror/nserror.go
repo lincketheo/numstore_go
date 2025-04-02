@@ -33,7 +33,7 @@ func extractCode(err error) int {
 	return 0
 }
 
-func Wrapf(err error, format string, args ...interface{}) error {
+func Wrapf(err error, format string, args ...any) error {
 	msg := fmt.Sprintf(format, args...)
 	return &DomainError{
 		Code:     extractCode(err),
@@ -58,4 +58,6 @@ var (
 
 	// WriteContext
 	WriteContext_DuplicateVar = New(12, "Invalid Write context, duplicate variable")
+
+  // IO Errors
 )

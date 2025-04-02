@@ -1,6 +1,7 @@
 package numstore
 
 import (
+	"encoding/binary"
 	"encoding/json"
 	"io"
 	"os"
@@ -9,23 +10,9 @@ import (
 	"github.com/lincketheo/numstore/internal/utils"
 )
 
-type CreateVariableArgs struct {
-	Name  string
-	Dtype Dtype
-	Shape []uint32
-}
-
-func (c CreateVariableArgs) toVariable() Variable {
-	return Variable{
-		Name:  c.Name,
-		Dtype: c.Dtype,
-		Shape: c.Shape,
-	}
-}
-
-type Variable struct {
+type VariableMeta struct {
 	Name  string   `json:"name"`
-	Dtype Dtype    `json:"Dtype"`
+	Dtype Dtype    `json:"dtype"`
 	Shape []uint32 `json:"shape"`
 }
 
@@ -38,52 +25,57 @@ type WritingVariable struct {
 
 /////////////////////////////////// Public
 
-func CreateVariable(con Connection, args CreateVariableArgs) error {
-	if !con.IsConnectedToDB() {
-		return nserror.NotConnectedToDB
-	}
-
-	v := args.toVariable()
-
+func CreateVariable(dbname string, v VariableMeta) error {
 	// Check if variable exists
-	if exists, err := varExistsAndValid(con, v.Name); err != nil {
+	if exists, err := varExistsAndValid(dbname, v.Name); err != nil {
 		return err
 	} else if exists {
 		return nserror.VarAlreadyExists
 	}
 
-	if err := createVarFolder(con, v.Name); err != nil {
+	if err := createVarFolder(dbname, v.Name); err != nil {
 		return err
 	}
 
-	if err := createVarMetaFile(con, v); err != nil {
+	if err := createVarMetaFile(dbname, v); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func LoadVariable(con Connection, name string) (Variable, error) {
-	if !con.IsConnectedToDB() {
-		return Variable{}, nserror.NotConnectedToDB
+func LoadVariableMeta(dbname, vname string) (VariableMeta, error) {
+	fname := varMetaFileName(dbname, vname)
+	data, err := os.ReadFile(fname)
+	if err != nil {
+		return VariableMeta{}, err
 	}
-	return loadVarMetaFile(con, name)
+
+	var v VariableMeta
+	if err := json.Unmarshal(data, &v); err != nil {
+		return VariableMeta{}, err
+	}
+
+	return v, nil
 }
 
-func (v Variable) Open(con Connection) (WritingVariable, error) {
-	dfd, err := os.OpenFile(varDataFileName(con, v.Name), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+func OpenVariable(dbname string, v VariableMeta) (WritingVariable, error) {
+	dfd, err := os.OpenFile(varDataFileName(dbname, v.Name), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		return WritingVariable{}, err
 	}
 
-	tfd, err := os.OpenFile(varTimeFileName(con, v.Name), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	tfd, err := os.OpenFile(varTimeFileName(dbname, v.Name), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		dfd.Close()
 		return WritingVariable{}, err
 	}
 
-	dataSize := utils.ReduceMultU32(v.Shape) * dtypeSizeof(v.Dtype)
-	timeSize := dtypeSizeof(U32)
+  dataSize := dtypeSizeof(v.Dtype)
+	if len(v.Shape) > 0 {
+    dataSize *= utils.ReduceMultU32(v.Shape)
+  }
+	timeSize := dtypeSizeof(U64)
 
 	data := make([]byte, dataSize)
 	time := make([]byte, timeSize)
@@ -98,7 +90,7 @@ func (v Variable) Open(con Connection) (WritingVariable, error) {
 	return ret, nil
 }
 
-func (v WritingVariable) WriteNext(r io.Reader) error {
+func (v WritingVariable) WriteNext(r io.Reader, t uint64) error {
 	if n, err := r.Read(v.dataBuffer); err != nil {
 		return err
 	} else if n != len(v.dataBuffer) {
@@ -111,34 +103,45 @@ func (v WritingVariable) WriteNext(r io.Reader) error {
 		panic("Invalid write")
 	}
 
+	binary.BigEndian.PutUint64(v.timeBuffer, t)
+	if n, err := v.tfd.Write(v.timeBuffer); err != nil {
+		return err
+	} else if n != len(v.timeBuffer) {
+		panic("Invalid write")
+	}
+
 	return nil
 }
 
-func (v WritingVariable) Close() (error, error) {
-	return v.tfd.Close(), v.vfd.Close()
+func (v WritingVariable) Close() error {
+	var err error = nil
+
+	err = v.tfd.Close()
+	err = v.vfd.Close()
+
+	return err
 }
 
 /////////////////////////////////// Private
 
-func varFolderName(con Connection, vname string) string {
-	utils.Assert(con.IsConnectedToDB())
-	return con.DbName + "/" + vname
+func varFolderName(db, vname string) string {
+	return db + "/" + vname
 }
 
-func varMetaFileName(con Connection, vname string) string {
-	return varFolderName(con, vname) + "/meta.json"
+func varMetaFileName(db, vname string) string {
+	return varFolderName(db, vname) + "/meta.json"
 }
 
-func varDataFileName(con Connection, vname string) string {
-	return varFolderName(con, vname) + "/data.bin"
+func varDataFileName(db, vname string) string {
+	return varFolderName(db, vname) + "/data.bin"
 }
 
-func varTimeFileName(con Connection, vname string) string {
-	return varFolderName(con, vname) + "/time.bin"
+func varTimeFileName(db, vname string) string {
+	return varFolderName(db, vname) + "/time.bin"
 }
 
-func varExistsAndValid(con Connection, v string) (bool, error) {
-	if stat, err := os.Stat(varFolderName(con, v)); err != nil && os.IsNotExist(err) {
+func varExistsAndValid(db, v string) (bool, error) {
+	if stat, err := os.Stat(varFolderName(db, v)); err != nil && os.IsNotExist(err) {
 		return false, nil
 	} else if err != nil {
 		return false, err
@@ -148,15 +151,15 @@ func varExistsAndValid(con Connection, v string) (bool, error) {
 	}
 }
 
-func createVarFolder(con Connection, vname string) error {
-	if err := os.Mkdir(varFolderName(con, vname), 0700); err != nil {
+func createVarFolder(dbname, vname string) error {
+	if err := os.Mkdir(varFolderName(dbname, vname), 0700); err != nil {
 		return err
 	}
 	return nil
 }
 
-func createVarMetaFile(con Connection, v Variable) error {
-	fname := varMetaFileName(con, v.Name)
+func createVarMetaFile(dbname string, v VariableMeta) error {
+	fname := varMetaFileName(dbname, v.Name)
 	file, err := os.OpenFile(fname, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		return err
@@ -174,19 +177,4 @@ func createVarMetaFile(con Connection, v Variable) error {
 	}
 
 	return nil
-}
-
-func loadVarMetaFile(con Connection, vname string) (Variable, error) {
-	fname := varMetaFileName(con, vname)
-	data, err := os.ReadFile(fname)
-	if err != nil {
-		return Variable{}, err
-	}
-
-	var v Variable
-	if err := json.Unmarshal(data, &v); err != nil {
-		return Variable{}, err
-	}
-
-	return v, nil
 }

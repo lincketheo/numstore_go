@@ -17,7 +17,6 @@ create a U32 unshaped
       to the variable contiguously because now the writer needs to understand the nature 
       of the format for shape
 
-
 2. Add properties to variables.
 ```
 create a U32 unshaped { "windowed": 10, ...., "prop1" = foo }
@@ -62,11 +61,19 @@ read 5 [(a, b), c]
 read 5 [(a, b[1:9], c), f[0], g][5:-10]
 ```
 
+- There is no invariant for duplicate read variables, you can read a variable twice 
+```
+# Not allowed
+write 5 [(a, a, b), c] 
+write 5 [(a, b), c, b] 
+write 6 [([a, b], c), d] 
+write 7 [([a, b], c), d] 
+```
+
+
 - Notes 
     - When you read indexes, only data that is available will be read _for all variables_
     - Let's say f is a non uniform shape array, then only results for all variables will show up when f has elements in it
-
-
 
 3. Group by 
 Let's say you've written two times
