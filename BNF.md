@@ -1,0 +1,13 @@
+STMT    := WEXPR | CEXPR | DEXPR | REXPR
+WEXPR   := write IDENT WARG
+WARG    := INTEGER WFORMAT
+WFORMAT := 
+
+CEXPR   := create IDENT DTYPE SHAPE 
+SHAPE   := INTEGER*
+
+DEXPR   := delete 
+
+
+
+

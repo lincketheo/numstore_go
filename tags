@@ -49,96 +49,250 @@
 !_TAG_ROLE_DESCRIPTION!Go!package	imported	/imported package/
 !_TAG_ROLE_DESCRIPTION!Go!unknown	receiverType	/receiver type/
 Assert	internal/utils/assert.go	/^func Assert(cond bool) {$/;"	f	package:utils
-Cause	internal/nserror/nserror.go	/^	Cause    error$/;"	m	struct:nserror.DomainError	typeref:typename:error
+BC_CREATE	internal/compiler/bytecode.go	/^	BC_CREATE$/;"	c	package:compiler
+BC_DELETE	internal/compiler/bytecode.go	/^	BC_DELETE$/;"	c	package:compiler
+BC_ERROR	internal/compiler/bytecode.go	/^  BC_ERROR$/;"	c	package:compiler
+BC_READ	internal/compiler/bytecode.go	/^	BC_READ$/;"	c	package:compiler
+BC_WRITE	internal/compiler/bytecode.go	/^	BC_WRITE bytecode = iota$/;"	c	package:compiler	typeref:type:bytecode
+BytesToUInt32Arr	internal/utils/numbers.go	/^func BytesToUInt32Arr(b []byte) []uint32 {$/;"	f	package:utils	typeref:typename:[]uint32
+CanIntBeByte	internal/utils/numbers.go	/^func CanIntBeByte(n int) bool {$/;"	f	package:utils	typeref:typename:bool
+CanUint64BeUint32	internal/utils/numbers.go	/^func CanUint64BeUint32(n uint64) bool {$/;"	f	package:utils	typeref:typename:bool
 Close	internal/numstore/variable.go	/^func (v WritingVariable) Close() error {$/;"	f	struct:numstore.WritingVariable	typeref:typename:error
 CloseWriteContext	internal/numstore/writer.go	/^func (w OpenWriteContext) CloseWriteContext() error {$/;"	f	struct:numstore.OpenWriteContext	typeref:typename:error
-Code	internal/nserror/nserror.go	/^	Code     int$/;"	m	struct:nserror.DomainError	typeref:typename:int
-ConnectingToVarWithoutDB	internal/nserror/nserror.go	/^	ConnectingToVarWithoutDB = New(6, "cannot connect variable without a database")$/;"	v	package:nserror
-ConnectionInvalidState	internal/nserror/nserror.go	/^	ConnectionInvalidState   = New(3, "invalid connection state")$/;"	v	package:nserror
 CreateDatabase	internal/numstore/database.go	/^func CreateDatabase(name string) error {$/;"	f	package:numstore	typeref:typename:error
 CreateVariable	internal/numstore/variable.go	/^func CreateVariable(dbname string, v VariableMeta) error {$/;"	f	package:numstore	typeref:typename:error
-DBAlreadyConnected	internal/nserror/nserror.go	/^	DBAlreadyConnected       = New(4, "database already connected")$/;"	v	package:nserror
-DBAlreadyExists	internal/nserror/nserror.go	/^	DBAlreadyExists          = New(1, "database already exists")$/;"	v	package:nserror
-DBNotConnected	internal/nserror/nserror.go	/^	DBNotConnected           = New(2, "database not connected")$/;"	v	package:nserror
+DEBUG	internal/logging/logging.go	/^	DEBUG$/;"	c	package:logging
 Database	internal/numstore/database.go	/^type Database struct {$/;"	s	package:numstore
+Dbname	internal/numstore/reader.go	/^	Dbname         string$/;"	m	struct:numstore.ReadContextRequest	typeref:typename:string
 Dbname	internal/numstore/writer.go	/^	Dbname    string$/;"	m	struct:numstore.WriteContextRequest	typeref:typename:string
+Debug	internal/logging/logging.go	/^func Debug(fmt string, msg ...any) {$/;"	f	package:logging
+Debug	internal/utils/config.go	/^const Debug = true$/;"	c	package:utils
 Default	internal/numstore/property.go	/^  Default() PropertyType $/;"	n	interface:numstore.PropertyTypeFactory	typeref:typename:PropertyType
-DomainError	internal/nserror/nserror.go	/^type DomainError struct {$/;"	s	package:nserror
-Dtype	internal/numstore/dtype.go	/^type Dtype uint16$/;"	t	package:numstore	typeref:typename:uint16
+Dtype	internal/core/dtype.go	/^type Dtype uint16$/;"	t	package:core	typeref:typename:uint16
 Dtype	internal/numstore/variable.go	/^	Dtype Dtype    `json:"dtype"`$/;"	m	struct:numstore.VariableMeta	typeref:typename:Dtype
-Error	internal/nserror/nserror.go	/^func (e *DomainError) Error() string {$/;"	f	struct:nserror.DomainError	typeref:typename:string
+DtypeFromString	internal/core/dtype.go	/^func DtypeFromString(s string) (Dtype, bool) {$/;"	f	package:core	typeref:typename:(Dtype, bool)
+DtypeSizeof	internal/core/dtype.go	/^func DtypeSizeof(dtype Dtype) uint32 {$/;"	f	package:core	typeref:typename:uint32
+ERROR	internal/logging/logging.go	/^	ERROR$/;"	c	package:logging
+Endian	internal/utils/config.go	/^var Endian = binary.LittleEndian$/;"	v	package:utils
+Error	internal/logging/logging.go	/^func Error(fmt string, msg ...any) {$/;"	f	package:logging
+ErrorContext	internal/nserror/nserror.go	/^func ErrorContext(err error) error {$/;"	f	package:nserror	typeref:typename:error
+ErrorMoref	internal/nserror/nserror.go	/^func ErrorMoref(cause error, msg string, args ...any) error {$/;"	f	package:nserror	typeref:typename:error
+ErrorStack	internal/nserror/nserror.go	/^func ErrorStack(cause error) error {$/;"	f	package:nserror	typeref:typename:error
+FATAL	internal/logging/logging.go	/^	FATAL$/;"	c	package:logging
 FileExists	internal/utils/fs.go	/^func FileExists(name string) (os.FileInfo, error) {$/;"	f	package:utils	typeref:typename:(os.FileInfo, error)
-InvalidDBName	internal/nserror/nserror.go	/^	InvalidDBName            = New(8, "invalid database name")$/;"	v	package:nserror
-InvalidVarName	internal/nserror/nserror.go	/^	InvalidVarName           = New(7, "invalid variable name")$/;"	v	package:nserror
-JSONInvalidDtype	internal/nserror/nserror.go	/^	JSONInvalidDtype         = New(11, "invalid dtype for JSON")$/;"	v	package:nserror
+GetFunctionName	internal/utils/reflection.go	/^func GetFunctionName(skip int) string {$/;"	f	package:utils	typeref:typename:string
+INFO	internal/logging/logging.go	/^	INFO$/;"	c	package:logging
+Info	internal/logging/logging.go	/^func Info(fmt string, msg ...any) {$/;"	f	package:logging
+IntCanPlus	internal/utils/numbers.go	/^func IntCanPlus(a int, b int) bool {$/;"	f	package:utils	typeref:typename:bool
+IntPlusWillOverflow	internal/utils/numbers.go	/^func IntPlusWillOverflow(a int, b int) bool {$/;"	f	package:utils	typeref:typename:bool
+IntPlusWillUnderflow	internal/utils/numbers.go	/^func IntPlusWillUnderflow(a int, b int) bool {$/;"	f	package:utils	typeref:typename:bool
+IntToUint32	internal/utils/numbers.go	/^func IntToUint32(arr []int) ([]uint32, error) {$/;"	f	package:utils	typeref:typename:([]uint32, error)
+IsAlpha	internal/utils/strings.go	/^func IsAlpha(c byte) bool {$/;"	f	package:utils	typeref:typename:bool
+IsAlphaNum	internal/utils/strings.go	/^func IsAlphaNum(c byte) bool {$/;"	f	package:utils	typeref:typename:bool
+IsDigit	internal/utils/strings.go	/^func IsDigit(c byte) bool {$/;"	f	package:utils	typeref:typename:bool
 Key	internal/numstore/property.go	/^  Key() string$/;"	n	interface:numstore.PropertyTypeFactory	typeref:typename:string
 LoadVariableMeta	internal/numstore/variable.go	/^func LoadVariableMeta(dbname, vname string) (VariableMeta, error) {$/;"	f	package:numstore	typeref:typename:(VariableMeta, error)
-MarshalJSON	internal/numstore/dtype.go	/^func (d Dtype) MarshalJSON() ([]byte, error) {$/;"	f	type:numstore.Dtype	typeref:typename:([]byte, error)
-Messages	internal/nserror/nserror.go	/^	Messages []string$/;"	m	struct:nserror.DomainError	typeref:typename:[]string
-Name	internal/numstore/database.go	/^	Name  string `json:"name"`$/;"	m	struct:numstore.Database	typeref:typename:string
+LogLevel	internal/logging/logging.go	/^type LogLevel int$/;"	t	package:logging	typeref:typename:int
+MarshalJSON	internal/core/dtype.go	/^func (d Dtype) MarshalJSON() ([]byte, error) {$/;"	f	type:core.Dtype	typeref:typename:([]byte, error)
+Name	internal/numstore/database.go	/^	Name string `json:"name"`$/;"	m	struct:numstore.Database	typeref:typename:string
 Name	internal/numstore/variable.go	/^	Name  string   `json:"name"`$/;"	m	struct:numstore.VariableMeta	typeref:typename:string
-New	internal/nserror/nserror.go	/^func New(code int, msg string) error {$/;"	f	package:nserror	typeref:typename:error
-NotConnectedToDB	internal/nserror/nserror.go	/^	NotConnectedToDB         = New(9, "not connected to database")$/;"	v	package:nserror
 OpenVariable	internal/numstore/variable.go	/^func OpenVariable(dbname string, v VariableMeta) (WritingVariable, error) {$/;"	f	package:numstore	typeref:typename:(WritingVariable, error)
 OpenWriteContext	internal/numstore/writer.go	/^func (w WriteContext) OpenWriteContext() (OpenWriteContext, error) {$/;"	f	struct:numstore.WriteContext	typeref:typename:(OpenWriteContext, error)
 OpenWriteContext	internal/numstore/writer.go	/^type OpenWriteContext struct {$/;"	s	package:numstore
 OpenWriteContextRequest	internal/numstore/writer.go	/^func (w WriteContextRequest) OpenWriteContextRequest() (WriteContext, error) {$/;"	f	struct:numstore.WriteContextRequest	typeref:typename:(WriteContext, error)
+Parse	internal/compiler/parser.go	/^func Parse(data []token) error {$/;"	f	package:compiler	typeref:typename:error
 Parse	internal/numstore/property.go	/^  Parse(json string) string$/;"	n	interface:numstore.PropertyType	typeref:typename:string
+ParseUInt32Slice	internal/utils/numbers.go	/^func ParseUInt32Slice(input string) ([]uint32, error) {$/;"	f	package:utils	typeref:typename:([]uint32, error)
 PrettyString	internal/numstore/property.go	/^	PrettyString() string$/;"	n	interface:numstore.PropertyType	typeref:typename:string
+ProgramName	internal/utils/config.go	/^var ProgramName = "NDB"$/;"	v	package:utils
 PropertyType	internal/numstore/property.go	/^type PropertyType interface {$/;"	i	package:numstore
 PropertyTypeFactory	internal/numstore/property.go	/^type PropertyTypeFactory interface {$/;"	i	package:numstore
+Range	internal/numstore/range.go	/^type Range struct {$/;"	s	package:numstore
+ReadContextRequest	internal/numstore/reader.go	/^type ReadContextRequest struct {$/;"	s	package:numstore
 ReduceMultU32	internal/utils/arrays.go	/^func ReduceMultU32(arr []uint32) uint32 {$/;"	f	package:utils	typeref:typename:uint32
 Register	internal/numstore/property.go	/^func Register(factory PropertyTypeFactory) {$/;"	f	package:numstore
+Run	internal/shell/shell.go	/^func Run(dbName string) {$/;"	f	package:shell
+Scan	internal/compiler/scanner.go	/^func Scan(data string) []token {$/;"	f	package:compiler	typeref:typename:[]token
 Serialize	internal/numstore/property.go	/^  Serialize() string$/;"	n	interface:numstore.PropertyType	typeref:typename:string
 Shape	internal/numstore/variable.go	/^	Shape []uint32 `json:"shape"`$/;"	m	struct:numstore.VariableMeta	typeref:typename:[]uint32
-String	internal/numstore/dtype.go	/^func (d Dtype) String() string {$/;"	f	type:numstore.Dtype	typeref:typename:string
+String	internal/compiler/tokens.go	/^func (t tokenType) String() string {$/;"	f	type:compiler.tokenType	typeref:typename:string
+String	internal/core/dtype.go	/^func (d Dtype) String() string {$/;"	f	type:core.Dtype	typeref:typename:string
+TOK_COLON	internal/compiler/tokens.go	/^	TOK_COLON$/;"	c	package:compiler
+TOK_COLON	internal/numstore/range.go	/^	TOK_COLON$/;"	c	package:numstore
+TOK_COMMA	internal/compiler/tokens.go	/^	TOK_COMMA$/;"	c	package:compiler
+TOK_CREATE	internal/compiler/tokens.go	/^	TOK_CREATE$/;"	c	package:compiler
+TOK_DELETE	internal/compiler/tokens.go	/^	TOK_DELETE$/;"	c	package:compiler
+TOK_DTYPE	internal/compiler/tokens.go	/^	TOK_DTYPE$/;"	c	package:compiler
+TOK_EOF	internal/compiler/tokens.go	/^	TOK_EOF$/;"	c	package:compiler
+TOK_FLOAT	internal/compiler/tokens.go	/^	TOK_FLOAT$/;"	c	package:compiler
+TOK_IDENTIFIER	internal/compiler/tokens.go	/^	TOK_IDENTIFIER$/;"	c	package:compiler
+TOK_INTEGER	internal/compiler/tokens.go	/^	TOK_INTEGER$/;"	c	package:compiler
+TOK_LEFT_BRACKET	internal/compiler/tokens.go	/^	TOK_LEFT_BRACKET$/;"	c	package:compiler
+TOK_LEFT_BRACKET	internal/numstore/range.go	/^	TOK_LEFT_BRACKET parse_tok = iota$/;"	c	package:numstore	typeref:type:parse_tok
+TOK_LEFT_CURLY	internal/compiler/tokens.go	/^	TOK_LEFT_CURLY$/;"	c	package:compiler
+TOK_LEFT_PAREN	internal/compiler/tokens.go	/^	TOK_LEFT_PAREN$/;"	c	package:compiler
+TOK_NONE	internal/compiler/tokens.go	/^	TOK_NONE tokenType = iota$/;"	c	package:compiler	typeref:type:tokenType
+TOK_NUMBER	internal/numstore/range.go	/^	TOK_NUMBER$/;"	c	package:numstore
+TOK_READ	internal/compiler/tokens.go	/^	TOK_READ$/;"	c	package:compiler
+TOK_RIGHT_BRACKET	internal/compiler/tokens.go	/^	TOK_RIGHT_BRACKET$/;"	c	package:compiler
+TOK_RIGHT_BRACKET	internal/numstore/range.go	/^	TOK_RIGHT_BRACKET$/;"	c	package:numstore
+TOK_RIGHT_CURLY	internal/compiler/tokens.go	/^	TOK_RIGHT_CURLY$/;"	c	package:compiler
+TOK_RIGHT_PAREN	internal/compiler/tokens.go	/^	TOK_RIGHT_PAREN$/;"	c	package:compiler
+TOK_STRING	internal/compiler/tokens.go	/^	TOK_STRING$/;"	c	package:compiler
+TOK_WRITE	internal/compiler/tokens.go	/^	TOK_WRITE$/;"	c	package:compiler
+TRACE	internal/logging/logging.go	/^	TRACE LogLevel = iota$/;"	c	package:logging	typeref:type:LogLevel
+ToRead	internal/numstore/reader.go	/^	ToRead         int$/;"	m	struct:numstore.ReadContextRequest	typeref:typename:int
 ToWrite	internal/numstore/writer.go	/^	ToWrite   int$/;"	m	struct:numstore.WriteContextRequest	typeref:typename:int
-U16	internal/numstore/dtype.go	/^	U16 Dtype = iota$/;"	c	package:numstore	typeref:type:Dtype
-U32	internal/numstore/dtype.go	/^	U32 $/;"	c	package:numstore
-U64	internal/numstore/dtype.go	/^  U64$/;"	c	package:numstore
-UnmarshalJSON	internal/numstore/dtype.go	/^func (d *Dtype) UnmarshalJSON(data []byte) error {$/;"	f	type:numstore.Dtype	typeref:typename:error
-VarAlreadyConnected	internal/nserror/nserror.go	/^	VarAlreadyConnected      = New(5, "variable already connected")$/;"	v	package:nserror
-VarAlreadyExists	internal/nserror/nserror.go	/^	VarAlreadyExists         = New(10, "variable already exists")$/;"	v	package:nserror
+Trace	internal/logging/logging.go	/^func Trace(fmt string, msg ...any) {$/;"	f	package:logging
+U16	internal/core/dtype.go	/^	U16 Dtype = iota$/;"	c	package:core	typeref:type:Dtype
+U32	internal/core/dtype.go	/^	U32$/;"	c	package:core
+U64	internal/core/dtype.go	/^	U64$/;"	c	package:core
+UInt32ArrBytes	internal/utils/numbers.go	/^func UInt32ArrBytes(arr []uint32) []byte {$/;"	f	package:utils	typeref:typename:[]byte
+UnmarshalJSON	internal/core/dtype.go	/^func (d *Dtype) UnmarshalJSON(data []byte) error {$/;"	f	type:core.Dtype	typeref:typename:error
 VariableMeta	internal/numstore/variable.go	/^type VariableMeta struct {$/;"	s	package:numstore
+VariableSlice	internal/numstore/reader.go	/^type VariableSlice struct {$/;"	s	package:numstore
+VariableSlices	internal/numstore/reader.go	/^	VariableSlices [][]string$/;"	m	struct:numstore.ReadContextRequest	typeref:typename:[][]string
 Variables	internal/numstore/writer.go	/^	Variables [][]string$/;"	m	struct:numstore.WriteContextRequest	typeref:typename:[][]string
-Wrapf	internal/nserror/nserror.go	/^func Wrapf(err error, format string, args ...any) error {$/;"	f	package:nserror	typeref:typename:error
+Version	internal/utils/config.go	/^var Version = "0.0.1-wip"$/;"	v	package:utils
+VersionDate	internal/utils/config.go	/^var VersionDate = "2025-02-03 14:03:47"$/;"	v	package:utils
+WARN	internal/logging/logging.go	/^	WARN$/;"	c	package:logging
+Warn	internal/logging/logging.go	/^func Warn(fmt string, msg ...any) {$/;"	f	package:logging
 WriteAll	internal/numstore/writer.go	/^func (w OpenWriteContext) WriteAll(r io.Reader) error {$/;"	f	struct:numstore.OpenWriteContext	typeref:typename:error
 WriteContext	internal/numstore/writer.go	/^type WriteContext struct {$/;"	s	package:numstore
 WriteContextRequest	internal/numstore/writer.go	/^type WriteContextRequest struct {$/;"	s	package:numstore
-WriteContext_DuplicateVar	internal/nserror/nserror.go	/^	WriteContext_DuplicateVar = New(12, "Invalid Write context, duplicate variable")$/;"	v	package:nserror
 WriteNext	internal/numstore/variable.go	/^func (v WritingVariable) WriteNext(r io.Reader, t uint64) error {$/;"	f	struct:numstore.WritingVariable	typeref:typename:error
+WriteTokensToFileClean	internal/compiler/tokens.go	/^func WriteTokensToFileClean(fname string, tokens []token) error {$/;"	f	package:compiler	typeref:typename:error
 WritingVariable	internal/numstore/variable.go	/^type WritingVariable struct {$/;"	s	package:numstore
+assertTokens	internal/compiler/tokens.go	/^func assertTokens(toks []token, cur int) {$/;"	f	package:compiler
+byteStack	internal/compiler/bytestack.go	/^type byteStack struct {$/;"	s	package:compiler
+byteToBytecode	internal/compiler/bytecode.go	/^func byteToBytecode(b byte) (bytecode, bool) {$/;"	f	package:compiler	typeref:typename:(bytecode, bool)
+bytecode	internal/compiler/bytecode.go	/^type bytecode byte$/;"	t	package:compiler	typeref:typename:byte
+checkKeyword	internal/compiler/scanner.go	/^func (s *scanner) checkKeyword() tokenType {$/;"	f	struct:compiler.scanner	typeref:typename:tokenType
+cleanInput	internal/shell/shell.go	/^func cleanInput(text string) string {$/;"	f	package:shell	typeref:typename:string
+clearScreen	internal/shell/shell.go	/^func clearScreen() {$/;"	f	package:shell
+compileError	internal/compiler/bytestack.go	/^func (c *byteStack) compileError(fmt string, args ...any) {$/;"	f	struct:compiler.byteStack
+compileError	internal/compiler/parser.go	/^func (p *parser) compileError(msg string, args ...any) {$/;"	f	struct:compiler.parser
+compileError	internal/compiler/scanner.go	/^func (s *scanner) compileError(msg string, args ...any) {$/;"	f	struct:compiler.scanner
+compiler	internal/compiler/bytecode.go	/^package compiler$/;"	p
+compiler	internal/compiler/bytestack.go	/^package compiler$/;"	p
+compiler	internal/compiler/parser.go	/^package compiler$/;"	p
+compiler	internal/compiler/scanner.go	/^package compiler$/;"	p
+compiler	internal/compiler/tokens.go	/^package compiler$/;"	p
+core	internal/core/dtype.go	/^package core$/;"	p
+createByteStack	internal/compiler/bytestack.go	/^func createByteStack() byteStack {$/;"	f	package:compiler	typeref:typename:byteStack
 createDbFolder	internal/numstore/database.go	/^func createDbFolder(v Database) error {$/;"	f	package:numstore	typeref:typename:error
 createDbMetaFile	internal/numstore/database.go	/^func createDbMetaFile(v Database) error {$/;"	f	package:numstore	typeref:typename:error
 createVarFolder	internal/numstore/variable.go	/^func createVarFolder(dbname, vname string) error {$/;"	f	package:numstore	typeref:typename:error
 createVarMetaFile	internal/numstore/variable.go	/^func createVarMetaFile(dbname string, v VariableMeta) error {$/;"	f	package:numstore	typeref:typename:error
+cur	internal/compiler/parser.go	/^	cur     int$/;"	m	struct:compiler.parser	typeref:typename:int
+current	internal/compiler/scanner.go	/^	current int$/;"	m	struct:compiler.scanner	typeref:typename:int
+data	internal/compiler/bytestack.go	/^	data    []byte$/;"	m	struct:compiler.byteStack	typeref:typename:[]byte
+data	internal/compiler/parser.go	/^	data    []token$/;"	m	struct:compiler.parser	typeref:typename:[]token
+data	internal/compiler/scanner.go	/^	data    string$/;"	m	struct:compiler.scanner	typeref:typename:string
 dataBuffer	internal/numstore/variable.go	/^	dataBuffer []byte$/;"	m	struct:numstore.WritingVariable	typeref:typename:[]byte
 dbExistsAndValid	internal/numstore/database.go	/^func dbExistsAndValid(d Database) (bool, error) {$/;"	f	package:numstore	typeref:typename:(bool, error)
 dbFolderName	internal/numstore/database.go	/^func dbFolderName(d Database) string {$/;"	f	package:numstore	typeref:typename:string
 dbMetaFileName	internal/numstore/database.go	/^func dbMetaFileName(d Database) string {$/;"	f	package:numstore	typeref:typename:string
 dbname	internal/numstore/writer.go	/^	dbname    string$/;"	m	struct:numstore.OpenWriteContext	typeref:typename:string
 dbname	internal/numstore/writer.go	/^	dbname    string$/;"	m	struct:numstore.WriteContext	typeref:typename:string
-dtypeSizeof	internal/numstore/dtype.go	/^func dtypeSizeof(dtype Dtype) uint32 {$/;"	f	package:numstore	typeref:typename:uint32
+debugLogger	internal/logging/logging.go	/^	debugLogger = log.New(os.Stdout, "[DEBUG] ", 0)$/;"	v	package:logging
+displayHelp	internal/shell/shell.go	/^func displayHelp() {$/;"	f	package:shell
 enableAsserts	internal/utils/assert.go	/^const enableAsserts = true$/;"	c	package:utils
-extractCode	internal/nserror/nserror.go	/^func extractCode(err error) int {$/;"	f	package:nserror	typeref:typename:int
+errorLogger	internal/logging/logging.go	/^	errorLogger = log.New(os.Stderr, "[ERROR] ", 0)$/;"	v	package:logging
+handleCmd	internal/shell/shell.go	/^func handleCmd(cmd string) {$/;"	f	package:shell
+hasNLeft	internal/compiler/bytestack.go	/^func (c byteStack) hasNLeft(n int) bool {$/;"	f	struct:compiler.byteStack	typeref:typename:bool
+head	internal/compiler/bytestack.go	/^func (c byteStack) head() []byte {$/;"	f	struct:compiler.byteStack	typeref:typename:[]byte
+infoLogger	internal/logging/logging.go	/^	infoLogger  = log.New(os.Stdout, "[INFO]  ", 0)$/;"	v	package:logging
+interpretRange	internal/numstore/range.go	/^func interpretRange(toks []parse_tok, stack []int) (looseRange, error) {$/;"	f	package:numstore	typeref:typename:(looseRange, error)
+ip	internal/compiler/bytestack.go	/^	ip      int$/;"	m	struct:compiler.byteStack	typeref:typename:int
+isEnd	internal/compiler/bytestack.go	/^func (c byteStack) isEnd() bool {$/;"	f	struct:compiler.byteStack	typeref:typename:bool
+isEnd	internal/compiler/parser.go	/^func (p parser) isEnd() bool {$/;"	f	struct:compiler.parser	typeref:typename:bool
+isEnd	internal/compiler/scanner.go	/^func (s scanner) isEnd() bool {$/;"	f	struct:compiler.scanner	typeref:typename:bool
+isError	internal/compiler/bytestack.go	/^	isError bool$/;"	m	struct:compiler.byteStack	typeref:typename:bool
+isError	internal/compiler/parser.go	/^	isError bool$/;"	m	struct:compiler.parser	typeref:typename:bool
+isError	internal/compiler/scanner.go	/^	isError bool$/;"	m	struct:compiler.scanner	typeref:typename:bool
+line	internal/compiler/scanner.go	/^	line    int$/;"	m	struct:compiler.scanner	typeref:typename:int
+line	internal/compiler/tokens.go	/^	line  int$/;"	m	struct:compiler.token	typeref:typename:int
+logLevel	internal/logging/logging.go	/^const logLevel = TRACE$/;"	c	package:logging
+logging	internal/logging/logging.go	/^package logging$/;"	p
+looseRange	internal/numstore/range.go	/^type looseRange struct {$/;"	s	package:numstore
+looseRangePromote	internal/numstore/range.go	/^func looseRangePromote(s looseRange, arrLen uint64) Range {$/;"	f	package:numstore	typeref:typename:Range
 main	main.go	/^func main() {$/;"	f	package:main
 main	main.go	/^package main$/;"	p
+nextByte	internal/compiler/bytestack.go	/^func (c *byteStack) nextByte() byte {$/;"	f	struct:compiler.byteStack	typeref:typename:byte
+nextByteCode	internal/compiler/bytestack.go	/^func (c *byteStack) nextByteCode() (bytecode, bool) {$/;"	f	struct:compiler.byteStack	typeref:typename:(bytecode, bool)
+nextBytes	internal/compiler/bytestack.go	/^func (c *byteStack) nextBytes(n int) ([]byte, bool) {$/;"	f	struct:compiler.byteStack	typeref:typename:([]byte, bool)
+nextChar	internal/compiler/scanner.go	/^func (s *scanner) nextChar() byte {$/;"	f	struct:compiler.scanner	typeref:typename:byte
+nextIsEnd	internal/compiler/scanner.go	/^func (s scanner) nextIsEnd() bool {$/;"	f	struct:compiler.scanner	typeref:typename:bool
+nextString	internal/compiler/bytestack.go	/^func (c *byteStack) nextString() (string, bool) {$/;"	f	struct:compiler.byteStack	typeref:typename:(string, bool)
+nextStringOrError	internal/compiler/bytecode.go	/^func (p *byteStack) nextStringOrError() (string, error) {$/;"	f	unknown:compiler.byteStack	typeref:typename:(string, error)
+nextToken	internal/compiler/parser.go	/^func (p *parser) nextToken() (token, bool) {$/;"	f	struct:compiler.parser	typeref:typename:(token, bool)
+nextUint32Arr	internal/compiler/bytestack.go	/^func (c *byteStack) nextUint32Arr() ([]uint32, bool) {$/;"	f	struct:compiler.byteStack	typeref:typename:([]uint32, bool)
 nserror	internal/nserror/nserror.go	/^package nserror$/;"	p
 numstore	internal/numstore/database.go	/^package numstore$/;"	p
-numstore	internal/numstore/dtype.go	/^package numstore$/;"	p
-numstore	internal/numstore/numstore.go	/^package numstore$/;"	p
 numstore	internal/numstore/property.go	/^package numstore$/;"	p
-numstore	internal/numstore/stream.go	/^package numstore$/;"	p
+numstore	internal/numstore/range.go	/^package numstore$/;"	p
+numstore	internal/numstore/reader.go	/^package numstore$/;"	p
 numstore	internal/numstore/variable.go	/^package numstore$/;"	p
 numstore	internal/numstore/writer.go	/^package numstore$/;"	p
+parseCreate	internal/compiler/parser.go	/^func (p *parser) parseCreate() bool {$/;"	f	struct:compiler.parser	typeref:typename:bool
+parseDelete	internal/compiler/parser.go	/^func (p *parser) parseDelete() {$/;"	f	struct:compiler.parser
+parseDtype	internal/compiler/parser.go	/^func (p *parser) parseDtype() (core.Dtype, bool) {$/;"	f	struct:compiler.parser	typeref:typename:(core.Dtype, bool)
+parseIdent	internal/compiler/scanner.go	/^func (s *scanner) parseIdent() tokenType {$/;"	f	struct:compiler.scanner	typeref:typename:tokenType
+parseIdentifier	internal/compiler/parser.go	/^func (p *parser) parseIdentifier() (string, bool) {$/;"	f	struct:compiler.parser	typeref:typename:(string, bool)
+parseNext	internal/compiler/parser.go	/^func (p *parser) parseNext() {$/;"	f	struct:compiler.parser
+parseNumber	internal/compiler/scanner.go	/^func (s *scanner) parseNumber() tokenType {$/;"	f	struct:compiler.scanner	typeref:typename:tokenType
+parseRange	internal/numstore/range.go	/^func parseRange(str string) ([]parse_tok, []int, error) {$/;"	f	package:numstore	typeref:typename:([]parse_tok, []int, error)
+parseRead	internal/compiler/parser.go	/^func (p *parser) parseRead() {$/;"	f	struct:compiler.parser
+parseShape	internal/compiler/parser.go	/^func (p *parser) parseShape() ([]uint32, bool) {$/;"	f	struct:compiler.parser	typeref:typename:([]uint32, bool)
+parseString	internal/compiler/scanner.go	/^func (s *scanner) parseString() {$/;"	f	struct:compiler.scanner
+parseWrite	internal/compiler/parser.go	/^func (p *parser) parseWrite() {$/;"	f	struct:compiler.parser
+parse_tok	internal/numstore/range.go	/^type parse_tok int$/;"	t	package:numstore	typeref:typename:int
+parser	internal/compiler/parser.go	/^type parser struct {$/;"	s	package:compiler
+parserCreate	internal/compiler/parser.go	/^func parserCreate(_data []token) parser {$/;"	f	package:compiler	typeref:typename:parser
+peek2Char	internal/compiler/scanner.go	/^func (s scanner) peek2Char() byte {$/;"	f	struct:compiler.scanner	typeref:typename:byte
+peekChar	internal/compiler/scanner.go	/^func (s scanner) peekChar() byte {$/;"	f	struct:compiler.scanner	typeref:typename:byte
+peekToken	internal/compiler/parser.go	/^func (p *parser) peekToken() token {$/;"	f	struct:compiler.parser	typeref:typename:token
 propTypeRegistry	internal/numstore/property.go	/^var propTypeRegistry = make(map[string]PropertyTypeFactory)$/;"	v	package:numstore
+pushByte	internal/compiler/bytestack.go	/^func (c *byteStack) pushByte(b byte) {$/;"	f	struct:compiler.byteStack
+pushByteCode	internal/compiler/bytestack.go	/^func (c *byteStack) pushByteCode(b bytecode) {$/;"	f	struct:compiler.byteStack
+pushBytes	internal/compiler/bytestack.go	/^func (c *byteStack) pushBytes(data []byte) {$/;"	f	struct:compiler.byteStack
+pushStr	internal/compiler/bytestack.go	/^func (c *byteStack) pushStr(data string) {$/;"	f	struct:compiler.byteStack
+pushUint32Arr	internal/compiler/bytestack.go	/^func (c *byteStack) pushUint32Arr(s []uint32) {$/;"	f	struct:compiler.byteStack
+ret	internal/compiler/parser.go	/^	ret     byteStack$/;"	m	struct:compiler.parser	typeref:typename:byteStack
+scanNextToken	internal/compiler/scanner.go	/^func (s *scanner) scanNextToken() token {$/;"	f	struct:compiler.scanner	typeref:typename:token
+scanNextTokenType	internal/compiler/scanner.go	/^func (s *scanner) scanNextTokenType() tokenType {$/;"	f	struct:compiler.scanner	typeref:typename:tokenType
+scanner	internal/compiler/scanner.go	/^type scanner struct {$/;"	s	package:compiler
+scannerCreate	internal/compiler/scanner.go	/^func scannerCreate(_data string) scanner {$/;"	f	package:compiler	typeref:typename:scanner
+shell	internal/shell/shell.go	/^package shell$/;"	p
+skipWhitespace	internal/compiler/scanner.go	/^func (s *scanner) skipWhitespace() {$/;"	f	struct:compiler.scanner
+srangeToRange	internal/numstore/range.go	/^func srangeToRange(s int64, isSPresent bool, dflt uint64, arrLen uint64) uint64 {$/;"	f	package:numstore	typeref:typename:uint64
+start	internal/compiler/scanner.go	/^	start   int$/;"	m	struct:compiler.scanner	typeref:typename:int
+start	internal/numstore/range.go	/^	start        int64$/;"	m	struct:numstore.looseRange	typeref:typename:int64
+start	internal/numstore/range.go	/^	start uint64$/;"	m	struct:numstore.Range	typeref:typename:uint64
+startPresent	internal/numstore/range.go	/^	startPresent bool$/;"	m	struct:numstore.looseRange	typeref:typename:bool
+step	internal/numstore/range.go	/^	step         int32$/;"	m	struct:numstore.looseRange	typeref:typename:int32
+step	internal/numstore/range.go	/^	step  int32$/;"	m	struct:numstore.Range	typeref:typename:int32
+stepPresent	internal/numstore/range.go	/^	stepPresent  bool$/;"	m	struct:numstore.looseRange	typeref:typename:bool
+stop	internal/numstore/range.go	/^	stop         int64$/;"	m	struct:numstore.looseRange	typeref:typename:int64
+stop	internal/numstore/range.go	/^	stop  uint64$/;"	m	struct:numstore.Range	typeref:typename:uint64
+stopPresent	internal/numstore/range.go	/^	stopPresent  bool$/;"	m	struct:numstore.looseRange	typeref:typename:bool
 tfd	internal/numstore/variable.go	/^	tfd        *os.File$/;"	m	struct:numstore.WritingVariable	typeref:typename:*os.File
 timeBuffer	internal/numstore/variable.go	/^	timeBuffer []byte$/;"	m	struct:numstore.WritingVariable	typeref:typename:[]byte
 toWrite	internal/numstore/writer.go	/^	toWrite   int$/;"	m	struct:numstore.OpenWriteContext	typeref:typename:int
 toWrite	internal/numstore/writer.go	/^	toWrite   int$/;"	m	struct:numstore.WriteContext	typeref:typename:int
+token	internal/compiler/tokens.go	/^type token struct {$/;"	s	package:compiler
+tokenType	internal/compiler/tokens.go	/^type tokenType int$/;"	t	package:compiler	typeref:typename:int
+traceLogger	internal/logging/logging.go	/^	traceLogger = log.New(os.Stdout, "[TRACE] ", 0)$/;"	v	package:logging
+ttype	internal/compiler/tokens.go	/^	ttype tokenType$/;"	m	struct:compiler.token	typeref:typename:tokenType
 utils	internal/utils/arrays.go	/^package utils$/;"	p
 utils	internal/utils/assert.go	/^package utils$/;"	p
+utils	internal/utils/config.go	/^package utils$/;"	p
 utils	internal/utils/fs.go	/^package utils$/;"	p
+utils	internal/utils/numbers.go	/^package utils$/;"	p
+utils	internal/utils/reflection.go	/^package utils$/;"	p
+utils	internal/utils/strings.go	/^package utils $/;"	p
+value	internal/compiler/tokens.go	/^	value string$/;"	m	struct:compiler.token	typeref:typename:string
 varDataFileName	internal/numstore/variable.go	/^func varDataFileName(db, vname string) string {$/;"	f	package:numstore	typeref:typename:string
 varExistsAndValid	internal/numstore/variable.go	/^func varExistsAndValid(db, v string) (bool, error) {$/;"	f	package:numstore	typeref:typename:(bool, error)
 varFolderName	internal/numstore/variable.go	/^func varFolderName(db, vname string) string {$/;"	f	package:numstore	typeref:typename:string
@@ -147,3 +301,5 @@ varTimeFileName	internal/numstore/variable.go	/^func varTimeFileName(db, vname s
 variables	internal/numstore/writer.go	/^	variables [][]VariableMeta$/;"	m	struct:numstore.WriteContext	typeref:typename:[][]VariableMeta
 variables	internal/numstore/writer.go	/^	variables [][]WritingVariable$/;"	m	struct:numstore.OpenWriteContext	typeref:typename:[][]WritingVariable
 vfd	internal/numstore/variable.go	/^	vfd        *os.File$/;"	m	struct:numstore.WritingVariable	typeref:typename:*os.File
+vname	internal/numstore/reader.go	/^	vname string$/;"	m	struct:numstore.VariableSlice	typeref:typename:string
+warnLogger	internal/logging/logging.go	/^	warnLogger  = log.New(os.Stdout, "[WARN]  ", 0)$/;"	v	package:logging

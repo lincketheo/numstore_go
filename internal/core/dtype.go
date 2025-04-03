@@ -1,17 +1,16 @@
-package numstore
+package core
 
 import (
 	"encoding/json"
-
-	"github.com/lincketheo/numstore/internal/nserror"
+	"fmt"
 )
 
 type Dtype uint16
 
 const (
 	U16 Dtype = iota
-	U32 
-  U64
+	U32
+	U64
 )
 
 func (d Dtype) String() string {
@@ -20,17 +19,35 @@ func (d Dtype) String() string {
 		return "U16"
 	case U32:
 		return "U32"
-  case U64:
+	case U64:
 		return "U64"
 	}
 	panic("Unreachable")
+}
+
+func DtypeFromString(s string) (Dtype, bool) {
+	switch s {
+	case U16.String():
+		{
+			return U16, true
+		}
+	case U32.String():
+		{
+			return U32, true
+		}
+	case U64.String():
+		{
+			return U64, true
+		}
+	}
+  return 0, false
 }
 
 func (d Dtype) MarshalJSON() ([]byte, error) {
 	return json.Marshal(d.String())
 }
 
-func dtypeSizeof(dtype Dtype) uint32 {
+func DtypeSizeof(dtype Dtype) uint32 {
 	switch dtype {
 	case U16:
 		return 2
@@ -57,7 +74,7 @@ func (d *Dtype) UnmarshalJSON(data []byte) error {
 	case U64.String():
 		*d = U64
 	default:
-		return nserror.JSONInvalidDtype
+		return fmt.Errorf("Invalid JSON Dtype")
 	}
 
 	return nil

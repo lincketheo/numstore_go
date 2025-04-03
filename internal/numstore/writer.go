@@ -1,6 +1,7 @@
 package numstore
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/lincketheo/numstore/internal/nserror"
@@ -34,13 +35,13 @@ func (w WriteContextRequest) OpenWriteContextRequest() (WriteContext, error) {
 
 			// Do not allow duplicate variables
 			if _, exists := usedVars[v]; exists {
-				return WriteContext{}, nserror.WriteContext_DuplicateVar
+        return WriteContext{}, fmt.Errorf("Variable: %s was used more than once in write format string", v)
 			}
 
 			// Load variable meta
 			variable, err := LoadVariableMeta(w.Dbname, v)
 			if err != nil {
-				return WriteContext{}, err
+				return WriteContext{}, nserror.ErrorStack(err)
 			}
 
 			varCol[j] = variable
@@ -92,7 +93,7 @@ failed:
 			result[i][j].Close()
 		}
 	}
-	return OpenWriteContext{}, err
+	return OpenWriteContext{}, nserror.ErrorStack(err)
 }
 
 func (w OpenWriteContext) WriteAll(r io.Reader) error {
@@ -102,7 +103,7 @@ func (w OpenWriteContext) WriteAll(r io.Reader) error {
 
 			for _, v := range vcol {
 				if err := v.WriteNext(r, 0); err != nil {
-					return err
+					return nserror.ErrorStack(err)
 				}
 			}
 		}
@@ -122,5 +123,5 @@ func (w OpenWriteContext) CloseWriteContext() error {
 		}
 	}
 
-	return err
+	return nserror.ErrorStack(err)
 }
