@@ -206,6 +206,7 @@ cleanInput	internal/frontend/common.go	/^func cleanInput(text string) string {$/
 clearScreen	internal/frontend/shell.go	/^func clearScreen() {$/;"	f	package:nsfrontend
 compileError	internal/compiler/scanner.go	/^func (s *scanner) compileError(msg string, args ...any) {$/;"	f	struct:compiler.scanner
 compiler	internal/compiler/errors.go	/^package compiler$/;"	p
+compiler	internal/compiler/parseRange.go	/^package compiler$/;"	p
 compiler	internal/compiler/parseRead.go	/^package compiler$/;"	p
 compiler	internal/compiler/parseType.go	/^package compiler$/;"	p
 compiler	internal/compiler/parseWrite.go	/^package compiler$/;"	p
@@ -227,6 +228,8 @@ dbMetaFileName	internal/numstore/database.go	/^func dbMetaFileName(d Database) s
 dbname	internal/numstore/writing.go	/^	dbname    string$/;"	m	struct:numstore.OpenWriteContext	typeref:typename:string
 dbname	internal/numstore/writing.go	/^	dbname    string$/;"	m	struct:numstore.WriteContext	typeref:typename:string
 debugLogger	internal/logging/logging.go	/^	debugLogger = log.New(os.Stdout, "[DEBUG] ", 0)$/;"	v	package:logging
+dimRange	internal/compiler/parseRange.go	/^  dimRange []ranges$/;"	m	struct:compiler.range	typeref:typename:[]ranges
+dimRange	internal/compiler/parseRange.go	/^type dimRange struct {$/;"	s	package:compiler
 displayHelp	internal/frontend/shell.go	/^func displayHelp() {$/;"	f	package:nsfrontend
 dtype	foo/bar/meta.json	/^{"name":"bar","dtype":"U64","shape":[]}/;"	s
 dtype	foo/baz/meta.json	/^{"name":"baz","dtype":"U32","shape":[]}/;"	s
@@ -305,6 +308,7 @@ peekToken	internal/compiler/parser.go	/^func (t parser) peekToken() (token, bool
 primitiveType	internal/numstore/nstypes.go	/^type primitiveType uint8$/;"	t	package:numstore	typeref:typename:uint8
 primitiveTypeSizeof	internal/numstore/nstypes.go	/^func primitiveTypeSizeof(pt primitiveType) uint32 {$/;"	f	package:numstore	typeref:typename:uint32
 propTypeRegistry	internal/numstore/property.go	/^var propTypeRegistry = make(map[string]PropertyTypeFactory)$/;"	v	package:numstore
+range	internal/compiler/parseRange.go	/^type range struct {$/;"	s	package:compiler
 scanNextToken	internal/compiler/scanner.go	/^func (s *scanner) scanNextToken() token {$/;"	f	struct:compiler.scanner	typeref:typename:token
 scanNextTokenType	internal/compiler/scanner.go	/^func (s *scanner) scanNextTokenType() tokenType {$/;"	f	struct:compiler.scanner	typeref:typename:tokenType
 scanner	internal/compiler/scanner.go	/^type scanner struct {$/;"	s	package:compiler
@@ -314,15 +318,21 @@ shape	foo/baz/meta.json	/^{"name":"baz","dtype":"U32","shape":[]}/;"	a
 shape	foo/fiz/meta.json	/^{"name":"fiz","dtype":"U32","shape":[]}/;"	a
 skipWhitespace	internal/compiler/scanner.go	/^func (s *scanner) skipWhitespace() {$/;"	f	struct:compiler.scanner
 srangeToRange	internal/numstore/range.go	/^func srangeToRange(s int64, isSPresent bool, dflt uint64, arrLen uint64) uint64 {$/;"	f	package:numstore	typeref:typename:uint64
+start	internal/compiler/parseRange.go	/^	start        int$/;"	m	struct:compiler.dimRange	typeref:typename:int
 start	internal/compiler/scanner.go	/^	start   int$/;"	m	struct:compiler.scanner	typeref:typename:int
 start	internal/numstore/range.go	/^	start        int64$/;"	m	struct:numstore.looseRange	typeref:typename:int64
 start	internal/numstore/range.go	/^	start uint64$/;"	m	struct:numstore.Range	typeref:typename:uint64
+startPresent	internal/compiler/parseRange.go	/^	startPresent bool$/;"	m	struct:compiler.dimRange	typeref:typename:bool
 startPresent	internal/numstore/range.go	/^	startPresent bool$/;"	m	struct:numstore.looseRange	typeref:typename:bool
+step	internal/compiler/parseRange.go	/^	step         int$/;"	m	struct:compiler.dimRange	typeref:typename:int
 step	internal/numstore/range.go	/^	step         int32$/;"	m	struct:numstore.looseRange	typeref:typename:int32
 step	internal/numstore/range.go	/^	step  int32$/;"	m	struct:numstore.Range	typeref:typename:int32
+stepPresent	internal/compiler/parseRange.go	/^	stepPresent  bool$/;"	m	struct:compiler.dimRange	typeref:typename:bool
 stepPresent	internal/numstore/range.go	/^	stepPresent  bool$/;"	m	struct:numstore.looseRange	typeref:typename:bool
+stop	internal/compiler/parseRange.go	/^	stop         int$/;"	m	struct:compiler.dimRange	typeref:typename:int
 stop	internal/numstore/range.go	/^	stop         int64$/;"	m	struct:numstore.looseRange	typeref:typename:int64
 stop	internal/numstore/range.go	/^	stop  uint64$/;"	m	struct:numstore.Range	typeref:typename:uint64
+stopPresent	internal/compiler/parseRange.go	/^	stopPresent  bool$/;"	m	struct:compiler.dimRange	typeref:typename:bool
 stopPresent	internal/numstore/range.go	/^	stopPresent  bool$/;"	m	struct:numstore.looseRange	typeref:typename:bool
 tfd	internal/numstore/variable.go	/^	tfd        *os.File$/;"	m	struct:numstore.WritingVariable	typeref:typename:*os.File
 timeBuffer	internal/numstore/variable.go	/^	timeBuffer []byte$/;"	m	struct:numstore.WritingVariable	typeref:typename:[]byte
