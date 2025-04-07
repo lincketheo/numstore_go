@@ -12,9 +12,9 @@ import (
 )
 
 type VariableMeta struct {
-	Name  string   `json:"name"`
-	Dtype Dtype    `json:"dtype"`
-	Shape []uint32 `json:"shape"`
+	Name  string        `json:"name"`
+	Dtype primitiveType `json:"dtype"`
+	Shape []uint32      `json:"shape"`
 }
 
 type WritingVariable struct {
@@ -72,11 +72,11 @@ func OpenVariable(dbname string, v VariableMeta) (WritingVariable, error) {
 		return WritingVariable{}, nserror.ErrorStack(err)
 	}
 
-	dataSize := dtypeSizeof(v.Dtype)
+	dataSize := primitiveTypeSizeof(v.Dtype)
 	if len(v.Shape) > 0 {
 		dataSize *= utils.ReduceMultU32(v.Shape)
 	}
-	timeSize := dtypeSizeof(U64)
+	timeSize := primitiveTypeSizeof(U64)
 
 	data := make([]byte, dataSize)
 	time := make([]byte, timeSize)

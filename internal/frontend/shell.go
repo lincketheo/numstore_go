@@ -1,4 +1,4 @@
-package shell
+package nsfrontend
 
 import (
 	"bufio"
@@ -6,8 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
-	"github.com/lincketheo/numstore/internal/compiler"
 )
 
 func displayHelp() {
@@ -22,16 +20,7 @@ func clearScreen() {
 	cmd.Run()
 }
 
-func cleanInput(text string) string {
-	output := strings.TrimSpace(text)
-	return output
-}
-
-func handleCmd(cmd string) {
-  compiler.Parse(compiler.Scan(cmd))
-}
-
-func Run(dbName string) {
+func ShellRun(dbName string) {
 	controlCommands := map[string]any{
 		".help":  displayHelp,
 		".clear": clearScreen,
@@ -48,7 +37,7 @@ func Run(dbName string) {
 		} else {
 			handleCmd(text)
 		}
-    fmt.Print("> ")
+		fmt.Print("> ")
 	}
-  fmt.Println()
+	fmt.Println()
 }

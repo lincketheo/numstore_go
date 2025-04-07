@@ -7,7 +7,12 @@ import (
 	"github.com/lincketheo/numstore/internal/nserror"
 )
 
-type WriteContextRequest struct {
+type WriteFormat struct {
+	ToWrite   int
+	Variables [][]string
+}
+
+type WriteFormat2 struct {
 	ToWrite   int
 	Dbname    string
 	Variables [][]string
@@ -25,7 +30,7 @@ type OpenWriteContext struct {
 	variables [][]WritingVariable
 }
 
-func (w WriteContextRequest) OpenWriteContextRequest() (WriteContext, error) {
+func (w WriteFormat2) OpenWriteFormat2() (WriteContext, error) {
 	result := make([][]VariableMeta, len(w.Variables))
 	usedVars := make(map[string]struct{})
 

@@ -1,179 +1,222 @@
 package compiler
 
 import (
-	"strconv"
-
-	"github.com/lincketheo/numstore/internal/core"
-	"github.com/lincketheo/numstore/internal/logging"
-	"github.com/lincketheo/numstore/internal/utils"
+	"fmt"
 )
 
+//////////////////////////////// PARSER
 type parser struct {
-	isError bool
-	ret     byteStack
-	data    []token
+	tokens  []token
 	cur     int
+	isError bool
 }
 
-func Parse(data []token) error {
-	p := parserCreate(data)
+func (t parser) isEnd() bool {
+	return t.cur >= len(t.tokens)
+}
 
-	for !p.isEnd() {
-		p.parseNext()
+func (t *parser) nextToken() (token, bool) {
+	if t.isEnd() {
+		return token{}, false
 	}
 
+	cur := t.cur
+	t.cur += 1
+	return t.tokens[cur], true
+}
+
+func (t parser) peekToken() (token, bool) {
+	if t.isEnd() {
+		return token{}, false
+	}
+
+	return t.tokens[t.cur], true
+}
+
+func (p *parser) expect(t tokenType) (token, error) {
+	tok, ok := p.peekToken()
+	if !ok {
+		return token{}, fmt.Errorf("Expected token: %v, "+
+			"got end of token stream", t)
+	}
+
+	if tok.ttype != t {
+		return token{}, fmt.Errorf("Expected token: %v, "+
+			"got token: %v", t, tok.ttype)
+	}
+
+	// advance
+	_, ok = p.nextToken()
+
+	return tok, nil
+}
+
+//////////////////////////////// PARSE
+func RunTokens(tokens []token) error {
+	if len(tokens) == 0 {
+		return nil
+	}
+
+	runner := parser{
+		tokens: tokens,
+		cur:    0,
+	}
+
+	for t, ok := runner.nextToken(); ok; t, ok = runner.nextToken() {
+		switch t.ttype {
+		case TOK_CREATE:
+			{
+				if err := runner.handleTokCreate(); err != nil {
+					return err
+				}
+			}
+		case TOK_DELETE:
+			{
+				if err := runner.handleTokDelete(); err != nil {
+					return err
+				}
+			}
+		case TOK_READ:
+			{
+				if err := runner.handleTokRead(); err != nil {
+					return err
+				}
+			}
+		case TOK_WRITE:
+			{
+				if err := runner.handleTokWrite(); err != nil {
+					return err
+				}
+			}
+		case TOK_OPEN:
+			{
+				if err := runner.handleTokOpen(); err != nil {
+					return err
+				}
+			}
+		case TOK_CLOSE:
+			{
+				if err := runner.handleTokClose(); err != nil {
+					return err
+				}
+			}
+		case TOK_TAKE:
+			{
+				if err := runner.handleTokTake(); err != nil {
+					return err
+				}
+			}
+		case TOK_EOF:
+			{
+				return nil
+			}
+		default:
+			return fmt.Errorf("Invalid token: %v", t)
+		}
+
+		if _, err := runner.expect(TOK_SEMICOLON); err != nil {
+			return err
+		}
+	}
+
+	panic("Unreachable")
+}
+
+// DONE
+func (t *parser) handleTokCreate() error {
+	v, ok := t.nextToken()
+	if !ok {
+		return expectedAfter(TOK_IDENTIFIER, TOK_CREATE)
+	}
+
+	if v.ttype != TOK_IDENTIFIER {
+		return invalidAfterExpected(v.ttype, TOK_CREATE, TOK_IDENTIFIER)
+	}
+
+	if nstype, err := t.parseType(); err != nil {
+		return err
+	} else {
+		fmt.Printf("CREATING: %v\n", nstype)
+		return nil
+	}
+}
+
+func (t *parser) handleTokDelete() error {
+	v, ok := t.nextToken()
+	if !ok {
+		return expectedAfter(TOK_IDENTIFIER, TOK_DELETE)
+	}
+
+	if v.ttype != TOK_IDENTIFIER {
+		return invalidAfterExpected(v.ttype, TOK_DELETE, TOK_IDENTIFIER)
+	}
+
+	fmt.Printf("DELETING: %v\n", v.value)
 	return nil
 }
 
-func (p *parser) parseNext() {
-	t, _ := p.nextToken()
-	switch t.ttype {
-	case TOK_DELETE:
-		{
-			p.parseDelete()
-		}
-	case TOK_CREATE:
-		{
-			p.parseCreate()
-		}
-	case TOK_READ:
-		{
-			p.parseRead()
-		}
-	case TOK_WRITE:
-		{
-			p.parseWrite()
-		}
-	default:
-		panic("Invalid token")
-	}
-}
-
-func (p *parser) parseDelete() {
-	p.ret.pushByteCode(BC_DELETE)
-	// TODO
-}
-
-func (p *parser) parseCreate() bool {
-	p.ret.pushByteCode(BC_CREATE)
-
-	vname, ok := p.parseIdentifier()
+func (t *parser) handleTokRead() error {
+	v, ok := t.nextToken()
 	if !ok {
-		return false
+		return expectedAfter(TOK_IDENTIFIER, TOK_READ)
 	}
 
-	dtype, ok := p.parseDtype()
+	if v.ttype != TOK_IDENTIFIER {
+		return invalidAfterExpected(v.ttype, TOK_READ, TOK_IDENTIFIER)
+	}
+
+	fmt.Printf("READING: %v\n", v.value)
+	return nil
+}
+
+// DONE
+func (t *parser) handleTokWrite() error {
+	if wfmt, err := t.parseWriteFormat(); err != nil {
+		return err
+	} else {
+		fmt.Printf("Writing: %v\n", wfmt)
+		return nil
+	}
+}
+
+func (t *parser) handleTokOpen() error {
+	v, ok := t.nextToken()
 	if !ok {
-		return false
+		return expectedAfter(TOK_IDENTIFIER, TOK_OPEN)
 	}
 
-	shape, ok := p.parseShape()
+	if v.ttype != TOK_IDENTIFIER {
+		return invalidAfterExpected(v.ttype, TOK_OPEN, TOK_IDENTIFIER)
+	}
+
+	fmt.Printf("OPENING: %v\n", v.value)
+	return nil
+}
+
+func (t *parser) handleTokClose() error {
+	v, ok := t.nextToken()
 	if !ok {
-		return false
+		return expectedAfter(TOK_IDENTIFIER, TOK_CLOSE)
 	}
 
-	logging.Debug("Create: %s %v %d", vname, dtype, shape)
-	return true
-}
-
-func (p *parser) parseIdentifier() (string, bool) {
-	t, end := p.nextToken()
-	if end {
-		p.compileError("Unexpected end of input after create operation code")
-		return "", false
-	}
-	if t.ttype != TOK_IDENTIFIER {
-		p.compileError("Expected IDENTIFIER after create operation code")
-		return "", false
-	}
-	return t.value, true
-}
-
-func (p *parser) parseDtype() (core.Dtype, bool) {
-	t, end := p.nextToken()
-	if end {
-		p.compileError("Unexpected end of input after create IDENTIFIER")
-		return 0, false
-	}
-	if t.ttype != TOK_DTYPE {
-		p.compileError("Expected DTYPE after create IDENTIFIER")
-		return 0, false
+	if v.ttype != TOK_IDENTIFIER {
+		return invalidAfterExpected(v.ttype, TOK_CLOSE, TOK_IDENTIFIER)
 	}
 
-	dtype, ok := core.DtypeFromString(t.value)
-	utils.Assert(ok) // Already checked this in scanner - duplicate checks
-	return dtype, true
+	fmt.Printf("CLOSEING: %v\n", v.value)
+	return nil
 }
 
-func (p *parser) parseShape() ([]uint32, bool) {
-	var shape []uint32
-	for {
-		t := p.peekToken()
-		if t.ttype == TOK_INTEGER {
-			i, err := strconv.ParseInt(t.value, 10, 32)
-
-			// Parse check
-			if err != nil {
-				p.compileError("Expected shape dimension > 0. Got: %s", t.value)
-				return nil, false
-			}
-
-			// Range check
-			if i < 0 {
-				p.compileError("Expected shape dimension > 0. Got: %s", t.value)
-				return nil, false
-			}
-
-			shape = append(shape, uint32(i))
-			_, end := p.nextToken()
-			if end {
-				p.compileError("Unexpected end of input while parsing shape dimensions")
-				return nil, false
-			}
-		} else {
-			break
-		}
+func (t *parser) handleTokTake() error {
+	v, ok := t.nextToken()
+	if !ok {
+		return expectedAfter(TOK_IDENTIFIER, TOK_TAKE)
 	}
-	return shape, true
-}
 
-func (p *parser) parseRead() {
-	p.ret.pushByteCode(BC_READ)
-	// TODO
-}
-
-func (p *parser) parseWrite() {
-	p.ret.pushByteCode(BC_WRITE)
-	// TODO
-}
-
-func (p parser) isEnd() bool {
-	assertTokens(p.data, p.cur)
-	return p.data[p.cur].ttype == TOK_EOF
-}
-
-func (p *parser) peekToken() token {
-	return p.data[p.cur]
-}
-
-func (p *parser) nextToken() (token, bool) {
-  if p.isEnd() {
-    return token{}, false
-  }
-	ret := p.data[p.cur]
-	p.cur++
-	return ret, true
-}
-
-func (p *parser) compileError(msg string, args ...any) {
-	p.isError = true
-	p.ret.pushByteCode(BC_ERROR)
-	logging.Error(msg, args...)
-}
-
-func parserCreate(_data []token) parser {
-	return parser{
-		data: _data,
-		cur:  0,
+	if v.ttype != TOK_IDENTIFIER {
+		return invalidAfterExpected(v.ttype, TOK_TAKE, TOK_IDENTIFIER)
 	}
+
+	fmt.Printf("TAKEING: %v\n", v.value)
+	return nil
 }

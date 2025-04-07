@@ -1,14 +1,6 @@
 package compiler
 
-import (
-	"bufio"
-	"os"
-	"strconv"
-
-	"github.com/lincketheo/numstore/internal/logging"
-	"github.com/lincketheo/numstore/internal/nserror"
-	"github.com/lincketheo/numstore/internal/utils"
-)
+import "fmt"
 
 type tokenType int
 
@@ -18,34 +10,9 @@ type token struct {
 	line  int
 }
 
-func WriteTokensToFileClean(fname string, tokens []token) error {
-	file, err := os.Create(fname)
-	if err != nil {
-		return nserror.ErrorStack(err)
-	}
-	defer func() {
-		if err := file.Close(); err != nil {
-			logging.Warn("Failed to close file: %s. %v\n", fname, err)
-		}
-	}()
-
-	writer := bufio.NewWriter(file)
-
-	for _, t := range tokens {
-		if _, err := writer.WriteString(
-			strconv.Itoa(t.line) +
-				" " + t.ttype.String() +
-				" " + t.value + "\n",
-		); err != nil {
-			return nserror.ErrorStack(err)
-		}
-	}
-
-	if err := writer.Flush(); err != nil {
-		logging.Warn("Failed to flush file: %s. %v\n", fname, err)
-	}
-
-	return nil
+func (t token) String() string {
+	return fmt.Sprintf("{Token: %s Value: %s Line %d}",
+		t.ttype.String(), t.value, t.line)
 }
 
 const (
@@ -58,35 +25,41 @@ const (
 	TOK_DELETE
 	TOK_READ
 	TOK_WRITE
+	TOK_OPEN
+	TOK_CLOSE
+	TOK_TAKE
+
+	// Type Keywords
+	TOK_UNION
+	TOK_STRUCT
+	TOK_ENUM
+	TOK_PRIM
 
 	// Structure
 	TOK_LEFT_BRACKET
 	TOK_RIGHT_BRACKET
-	TOK_LEFT_PAREN
-	TOK_RIGHT_PAREN
 	TOK_LEFT_CURLY
 	TOK_RIGHT_CURLY
+	TOK_LEFT_PAREN
+	TOK_RIGHT_PAREN
 	TOK_COMMA
-	TOK_COLON
+	TOK_SEMICOLON
 
-	// Numbers
+	// Values
+	TOK_IDENTIFIER
+	TOK_STRING
 	TOK_INTEGER
 	TOK_FLOAT
 
-	// Variables
-	TOK_IDENTIFIER
-	TOK_STRING
-
-	// DType
-	TOK_DTYPE
-
-	// To indicate done parsing
+	// Indicate end of file
 	TOK_EOF
 )
 
 func (t tokenType) String() string {
 
 	switch t {
+	// A none type used for code flow
+	// not a real token
 	case TOK_NONE:
 		return "TOK_NONE"
 
@@ -99,53 +72,53 @@ func (t tokenType) String() string {
 		return "TOK_READ"
 	case TOK_WRITE:
 		return "TOK_WRITE"
+	case TOK_OPEN:
+		return "TOK_OPEN"
+	case TOK_CLOSE:
+		return "TOK_CLOSE"
+	case TOK_TAKE:
+		return "TOK_TAKE"
+
+	// Type Keywords
+	case TOK_UNION:
+		return "TOK_UNION"
+	case TOK_STRUCT:
+		return "TOK_STRUCT"
+	case TOK_ENUM:
+		return "TOK_ENUM"
+	case TOK_PRIM:
+		return "TOK_PRIM"
 
 		// Structure
 	case TOK_LEFT_BRACKET:
 		return "TOK_LEFT_BRACKET"
 	case TOK_RIGHT_BRACKET:
 		return "TOK_RIGHT_BRACKET"
-	case TOK_LEFT_PAREN:
-		return "TOK_LEFT_PAREN"
-	case TOK_RIGHT_PAREN:
-		return "TOK_RIGHT_PAREN"
 	case TOK_LEFT_CURLY:
 		return "TOK_LEFT_CURLY"
 	case TOK_RIGHT_CURLY:
 		return "TOK_RIGHT_CURLY"
+	case TOK_RIGHT_PAREN:
+		return "TOK_RIGHT_PAREN"
+	case TOK_LEFT_PAREN:
+		return "TOK_LEFT_PAREN"
 	case TOK_COMMA:
 		return "TOK_COMMA"
-	case TOK_COLON:
-		return "TOK_COLON"
+	case TOK_SEMICOLON:
+		return "TOK_SEMICOLON"
 
-	// Numbers
+		// Values
+	case TOK_IDENTIFIER:
+		return "TOK_IDENTIFIER"
+	case TOK_STRING:
+		return "TOK_STRING"
 	case TOK_INTEGER:
 		return "TOK_INTEGER"
 	case TOK_FLOAT:
 		return "TOK_FLOAT"
 
-	// Variables
-	case TOK_IDENTIFIER:
-		return "TOK_IDENTIFIER"
-	case TOK_STRING:
-		return "TOK_STRING"
-
-		// DType
-	case TOK_DTYPE:
-		return "TOK_DType"
-
-	// To indicate done parsing
 	case TOK_EOF:
 		return "TOK_EOF"
 	}
 	panic("Unknown tokenType")
-}
-
-func assertTokens(toks []token, cur int) {
-	utils.Assert(cur < len(toks))
-	if cur == len(toks)-1 {
-		utils.Assert(toks[cur].ttype == TOK_EOF)
-	} else {
-		utils.Assert(toks[cur].ttype != TOK_EOF)
-	}
 }

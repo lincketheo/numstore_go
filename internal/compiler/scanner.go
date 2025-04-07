@@ -3,8 +3,8 @@ package compiler
 import (
 	"fmt"
 
-	"github.com/lincketheo/numstore/internal/core"
 	"github.com/lincketheo/numstore/internal/logging"
+	"github.com/lincketheo/numstore/internal/numstore"
 	"github.com/lincketheo/numstore/internal/utils"
 )
 
@@ -85,10 +85,6 @@ func (s *scanner) scanNextTokenType() tokenType {
 	c := s.nextChar()
 
 	switch c {
-	case '(':
-		return TOK_LEFT_PAREN
-	case ')':
-		return TOK_RIGHT_PAREN
 	case '[':
 		return TOK_LEFT_BRACKET
 	case ']':
@@ -97,17 +93,14 @@ func (s *scanner) scanNextTokenType() tokenType {
 		return TOK_LEFT_CURLY
 	case '}':
 		return TOK_RIGHT_CURLY
+	case '(':
+		return TOK_LEFT_PAREN
+	case ')':
+		return TOK_RIGHT_PAREN
 	case ',':
 		return TOK_COMMA
-	case ':':
-		return TOK_COLON
-	case '#':
-		{
-			for !s.isEnd() && s.peekChar() != '\n' {
-				_ = s.nextChar()
-			}
-			return TOK_NONE
-		}
+	case ';':
+		return TOK_SEMICOLON
 	case '"':
 		{
 			s.parseString()
@@ -115,7 +108,7 @@ func (s *scanner) scanNextTokenType() tokenType {
 		}
 	default:
 		{
-			if utils.IsDigit(c) || c == '-' {
+			if utils.IsDigit(c) || c == '-' || c == '+' {
 				return s.parseNumber()
 			} else if utils.IsAlpha(c) {
 				return s.parseIdent()
@@ -134,6 +127,7 @@ func (s *scanner) parseString() {
 
 	if s.isEnd() {
 		s.compileError("Unterminated string")
+		return
 	}
 
 	s.nextChar()
@@ -156,8 +150,8 @@ func (s *scanner) parseNumber() tokenType {
 func (s *scanner) checkKeyword() tokenType {
 	lexeme := s.data[s.start:s.current]
 
-	if _, isDtype := core.DtypeFromString(lexeme); isDtype {
-		return TOK_DTYPE
+	if _, isPrim := numstore.PrimitiveTypeFromString(lexeme); isPrim {
+		return TOK_PRIM
 	}
 
 	switch lexeme {
@@ -169,6 +163,16 @@ func (s *scanner) checkKeyword() tokenType {
 		return TOK_READ
 	case "write":
 		return TOK_WRITE
+	case "open":
+		return TOK_OPEN
+	case "close":
+		return TOK_CLOSE
+	case "take":
+		return TOK_TAKE
+	case "union":
+		return TOK_UNION
+	case "struct":
+		return TOK_STRUCT
 	default:
 		return TOK_NONE
 	}
