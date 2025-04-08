@@ -23,6 +23,6 @@ type dimRange struct {
 	stepPresent  bool
 }
 
-type range struct {
-  dimRange []ranges
+type arrRange struct {
+  ranges []dimRange
 }

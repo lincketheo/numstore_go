@@ -1,0 +1,6 @@
+create a i32;
+create a [10] char;
+create a []bool;
+create a struct { a i32, b [10]u32, c struct { i i32 } };
+create a enum { FOO, BAR, BIZ };
+create a union { a cf128, b i8 };

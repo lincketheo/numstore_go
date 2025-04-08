@@ -29,7 +29,6 @@ type PrimitiveType struct {
 }
 
 type StrictArrayType struct {
-	Rank uint32   `json:"rank"`
 	Dims []uint32 `json:"dims"`
 	Of   Type     `json:"of"`
 }
@@ -99,7 +98,6 @@ func (t StrictArrayType) MarshalJSON() ([]byte, error) {
 		Of   json.RawMessage `json:"of"`
 	}{
 		Kind: StrictArrayKind,
-		Rank: t.Rank,
 		Dims: t.Dims,
 		Of:   ofBytes,
 	})
@@ -114,7 +112,7 @@ func (t *StrictArrayType) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	t.Rank, t.Dims = aux.Rank, aux.Dims
+	t.Dims = aux.Dims
 	inner, err := unmarshalType(aux.Of)
 	if err != nil {
 		return err

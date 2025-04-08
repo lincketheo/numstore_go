@@ -2,9 +2,10 @@ package compiler
 
 import (
 	"fmt"
+	"github.com/lincketheo/numstore/internal/logging"
 )
 
-//////////////////////////////// PARSER
+// ////////////////////////////// PARSER
 type parser struct {
 	tokens  []token
 	cur     int
@@ -13,6 +14,11 @@ type parser struct {
 
 func (t parser) isEnd() bool {
 	return t.cur >= len(t.tokens)
+}
+
+func (t *parser) parserError(exp ...tokenType) {
+	t.isError = true
+	logging.Error("Expected token types: %v", exp)
 }
 
 func (t *parser) nextToken() (token, bool) {
@@ -33,26 +39,22 @@ func (t parser) peekToken() (token, bool) {
 	return t.tokens[t.cur], true
 }
 
-func (p *parser) expect(t tokenType) (token, error) {
+func (p *parser) expect(t tokenType) (token, bool) {
 	tok, ok := p.peekToken()
 	if !ok {
-		return token{}, fmt.Errorf("Expected token: %v, "+
-			"got end of token stream", t)
+		return token{}, false
 	}
 
 	if tok.ttype != t {
-		return token{}, fmt.Errorf("Expected token: %v, "+
-			"got token: %v", t, tok.ttype)
+		return token{}, false
 	}
 
 	// advance
-	_, ok = p.nextToken()
-
-	return tok, nil
+	return p.nextToken()
 }
 
-//////////////////////////////// PARSE
-func RunTokens(tokens []token) error {
+// ////////////////////////////// PARSE
+func Parse(tokens []token) error {
 	if len(tokens) == 0 {
 		return nil
 	}
@@ -65,11 +67,7 @@ func RunTokens(tokens []token) error {
 	for t, ok := runner.nextToken(); ok; t, ok = runner.nextToken() {
 		switch t.ttype {
 		case TOK_CREATE:
-			{
-				if err := runner.handleTokCreate(); err != nil {
-					return err
-				}
-			}
+			runner.handleTokCreate()
 		case TOK_DELETE:
 			{
 				if err := runner.handleTokDelete(); err != nil {
@@ -123,46 +121,48 @@ func RunTokens(tokens []token) error {
 }
 
 // DONE
-func (t *parser) handleTokCreate() error {
+func (t *parser) handleTokCreate() {
 	v, ok := t.nextToken()
 	if !ok {
-		return expectedAfter(TOK_IDENTIFIER, TOK_CREATE)
+		t.parserError(TOK_IDENTIFIER)
+		return
 	}
 
 	if v.ttype != TOK_IDENTIFIER {
-		return invalidAfterExpected(v.ttype, TOK_CREATE, TOK_IDENTIFIER)
+    t.parserError(TOK_IDENTIFIER)
+		return
 	}
 
 	if nstype, err := t.parseType(); err != nil {
 		return err
 	} else {
 		fmt.Printf("CREATING: %v\n", nstype)
-		return nil
 	}
 }
 
-func (t *parser) handleTokDelete() error {
+func (t *parser) handleTokDelete() {
 	v, ok := t.nextToken()
 	if !ok {
-		return expectedAfter(TOK_IDENTIFIER, TOK_DELETE)
+		t.parserError(TOK_DELETE, TOK_IDENTIFIER)
+		return
 	}
 
 	if v.ttype != TOK_IDENTIFIER {
-		return invalidAfterExpected(v.ttype, TOK_DELETE, TOK_IDENTIFIER)
+		t.parserError(TOK_DELETE, TOK_IDENTIFIER)
+		return
 	}
 
 	fmt.Printf("DELETING: %v\n", v.value)
-	return nil
 }
 
 func (t *parser) handleTokRead() error {
 	v, ok := t.nextToken()
 	if !ok {
-		return expectedAfter(TOK_IDENTIFIER, TOK_READ)
+		return expectedTokenAfterToken(TOK_IDENTIFIER, TOK_READ)
 	}
 
 	if v.ttype != TOK_IDENTIFIER {
-		return invalidAfterExpected(v.ttype, TOK_READ, TOK_IDENTIFIER)
+		return invalidTokenAfterTokenExpected(v.ttype, TOK_READ, TOK_IDENTIFIER)
 	}
 
 	fmt.Printf("READING: %v\n", v.value)
@@ -182,11 +182,11 @@ func (t *parser) handleTokWrite() error {
 func (t *parser) handleTokOpen() error {
 	v, ok := t.nextToken()
 	if !ok {
-		return expectedAfter(TOK_IDENTIFIER, TOK_OPEN)
+		return expectedTokenAfterToken(TOK_IDENTIFIER, TOK_OPEN)
 	}
 
 	if v.ttype != TOK_IDENTIFIER {
-		return invalidAfterExpected(v.ttype, TOK_OPEN, TOK_IDENTIFIER)
+		return invalidTokenAfterTokenExpected(v.ttype, TOK_OPEN, TOK_IDENTIFIER)
 	}
 
 	fmt.Printf("OPENING: %v\n", v.value)
@@ -196,11 +196,11 @@ func (t *parser) handleTokOpen() error {
 func (t *parser) handleTokClose() error {
 	v, ok := t.nextToken()
 	if !ok {
-		return expectedAfter(TOK_IDENTIFIER, TOK_CLOSE)
+		return expectedTokenAfterToken(TOK_IDENTIFIER, TOK_CLOSE)
 	}
 
 	if v.ttype != TOK_IDENTIFIER {
-		return invalidAfterExpected(v.ttype, TOK_CLOSE, TOK_IDENTIFIER)
+		return invalidTokenAfterTokenExpected(v.ttype, TOK_CLOSE, TOK_IDENTIFIER)
 	}
 
 	fmt.Printf("CLOSEING: %v\n", v.value)
@@ -210,11 +210,11 @@ func (t *parser) handleTokClose() error {
 func (t *parser) handleTokTake() error {
 	v, ok := t.nextToken()
 	if !ok {
-		return expectedAfter(TOK_IDENTIFIER, TOK_TAKE)
+		return expectedTokenAfterToken(TOK_IDENTIFIER, TOK_TAKE)
 	}
 
 	if v.ttype != TOK_IDENTIFIER {
-		return invalidAfterExpected(v.ttype, TOK_TAKE, TOK_IDENTIFIER)
+		return invalidTokenAfterTokenExpected(v.ttype, TOK_TAKE, TOK_IDENTIFIER)
 	}
 
 	fmt.Printf("TAKEING: %v\n", v.value)

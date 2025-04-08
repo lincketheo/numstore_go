@@ -7,7 +7,7 @@ func (p *parser) parseWriteFormat() (numstore.WriteFormat, error) {
 	tok, ok := p.peekToken()
 	if !ok {
 		return numstore.WriteFormat{},
-			expectedStrButEOF("write format string")
+			expectedStringButEarlyTermination("WFMT")
 	}
 
 	// Options:
@@ -44,7 +44,7 @@ func (p *parser) parseWriteFormat() (numstore.WriteFormat, error) {
 		// Invalid
 	default:
 		{
-			return numstore.WriteFormat{}, expectedAnyButGot(tok.ttype,
+			return numstore.WriteFormat{}, invalidTokenExpectedAny(tok.ttype,
 				TOK_LEFT_BRACKET, TOK_LEFT_PAREN, TOK_IDENTIFIER)
 		}
 	}
@@ -67,8 +67,8 @@ func (p *parser) parseWriteFormatList() ([][]string, error) {
 	for {
 		tok, ok := p.peekToken()
 		if !ok {
-			return nil, expectedAnyButGot(
-				TOK_EOF, TOK_LEFT_PAREN, TOK_IDENTIFIER)
+			return nil, expectedAnyTokenButEarlyTermination(
+				TOK_LEFT_PAREN, TOK_IDENTIFIER)
 		}
 
 		var next []string
@@ -90,7 +90,7 @@ func (p *parser) parseWriteFormatList() ([][]string, error) {
 			}
 		default:
 			{
-				return nil, expectedAnyButGot(
+				return nil, invalidTokenAfterTokenExpected(
 					tok.ttype, TOK_LEFT_PAREN, TOK_IDENTIFIER)
 			}
 		}
@@ -113,7 +113,7 @@ func (p *parser) parseWriteFormatList() ([][]string, error) {
 			}
 		default:
 			{
-				return nil, expectedAnyButGot(tok.ttype,
+				return nil, invalidTokenAfterTokenExpected(tok.ttype,
 					TOK_COMMA, TOK_RIGHT_BRACKET)
 			}
 		}
@@ -130,7 +130,7 @@ func (p *parser) parseWriteFormatTuple() ([]string, error) {
 	for {
 		tok, ok := p.nextToken()
 		if !ok {
-			return nil, expectedTokButEOF(TOK_IDENTIFIER)
+			return nil, expectedAnyTokenButEarlyTermination(TOK_IDENTIFIER)
 		}
 
 		switch tok.ttype {
@@ -140,7 +140,7 @@ func (p *parser) parseWriteFormatTuple() ([]string, error) {
 			}
 		default:
 			{
-				return nil, expectedAnyButGot(tok.ttype, TOK_IDENTIFIER)
+				return nil, expectedTokenButGot(TOK_IDENTIFIER, tok.ttype)
 			}
 		}
 
@@ -160,7 +160,7 @@ func (p *parser) parseWriteFormatTuple() ([]string, error) {
 			}
 		default:
 			{
-				return nil, expectedAnyButGot(peek.ttype,
+				return nil, invalidTokenAfterTokenExpected(peek.ttype,
 					TOK_COMMA, TOK_RIGHT_PAREN)
 			}
 		}

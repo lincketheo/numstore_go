@@ -1,36 +1,29 @@
 package compiler
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/lincketheo/numstore/internal/numstore"
 )
 
-func (p *parser) parseType() (numstore.Type, error) {
+var typeStartTokens = []tokenType{TOK_UNION, TOK_STRUCT, TOK_ENUM, TOK_LEFT_BRACKET, TOK_PRIM}
+
+func (p *parser) parseType() (numstore.Type, bool) {
 	tok, ok := p.peekToken()
 	if !ok {
-		return nil, expectedStrButEOF("type")
+		p.parserError(typeStartTokens...)
+		return nil, false
 	}
 
+	// Check which type is next
 	switch tok.ttype {
 	case TOK_UNION:
-		{
-			if fields, err := p.parseStructOrUnion(TOK_UNION); err != nil {
-				return nil, err
-			} else {
-				return numstore.UnionType{Fields: fields}, nil
-			}
-		}
+		fields, ok := p.parseStructOrUnion(TOK_UNION)
+		return numstore.UnionType{Fields: fields}, ok
 
 	case TOK_STRUCT:
-		{
-			if fields, err := p.parseStructOrUnion(TOK_STRUCT); err != nil {
-				return nil, err
-			} else {
-				return numstore.StructType{Fields: fields}, nil
-			}
-		}
+		fields, ok := p.parseStructOrUnion(TOK_STRUCT)
+		return numstore.StructType{Fields: fields}, ok
 
 	case TOK_ENUM:
 		return p.parseEnum()
@@ -42,194 +35,207 @@ func (p *parser) parseType() (numstore.Type, error) {
 		return p.parsePrimitive()
 
 	default:
-		return nil, fmt.Errorf("expected type, got %v", tok)
+		p.parserError(typeStartTokens...)
+		return nil, false
 	}
 }
 
-func (p *parser) parseArray() (numstore.Type, error) {
-	if _, err := p.expect(TOK_LEFT_BRACKET); err != nil {
-		return nil, err
+func (p *parser) parseArray() (numstore.Type, bool) {
+	if _, ok := p.expect(TOK_LEFT_BRACKET); !ok {
+		p.parserError(TOK_LEFT_BRACKET)
+		return nil, false
 	}
 
 	// Check if next value is number (strict) or not (variable len)
-	if tok, _ := p.peekToken(); tok.ttype == TOK_INTEGER {
-		return p.parseStrictArray()
+	if tok, ok := p.peekToken(); ok && tok.ttype == TOK_INTEGER {
+		typed, ok := p.parseStrictArray()
+		return numstore.Type(typed), ok
 	}
 
-	return p.parseVarArray()
+	typed, ok := p.parseVarArray()
+	return numstore.Type(typed), ok
 }
 
-func (p *parser) parseStrictArray() (numstore.StrictArrayType, error) {
+func (p *parser) parseStrictArray() (numstore.StrictArrayType, bool) {
 	// Reminder - previous function consumed first token, expect ']' first
-
 	dims := []uint32{}
 
 	for {
-		// Parse Number
-		if num, err := p.expect(TOK_INTEGER); err != nil {
+		// Parse the value inside the brackets (10 in [10])
+		numTok, ok := p.expect(TOK_INTEGER)
+		if !ok {
 			break
-
-			// Failed to parse
-		} else if n, err := strconv.Atoi(num.value); err != nil {
-			return numstore.StrictArrayType{}, err
-
-			// Number is < 0
-		} else if n <= 0 {
-			return numstore.StrictArrayType{},
-				fmt.Errorf("Invalid array shape: %d, expecting shape > 0", n)
-
-			// Success
-		} else {
-			dims = append(dims, uint32(n))
 		}
 
-		// Expect "]"
-		if _, err := p.expect(TOK_RIGHT_BRACKET); err != nil {
-			return numstore.StrictArrayType{}, err
+		// Convert to integer
+		n, err := strconv.Atoi(numTok.value)
+		if err != nil {
+			return numstore.StrictArrayType{}, false
 		}
 
-		// Maybe Expect "["
-		if _, err := p.expect(TOK_LEFT_BRACKET); err != nil {
+		// Dims must be > 0
+		if n <= 0 {
+			return numstore.StrictArrayType{}, false
+		}
+
+		// Append to return
+		dims = append(dims, uint32(n))
+
+		// Check for right
+		if _, ok := p.expect(TOK_RIGHT_BRACKET); !ok {
+			p.parserError(TOK_RIGHT_BRACKET)
+			return numstore.StrictArrayType{}, false
+		}
+
+		// Done when no more left bracket
+		if _, ok := p.expect(TOK_LEFT_BRACKET); !ok {
 			break
 		}
 	}
 
-	elem, err := p.parseType()
-	if err != nil {
-		return numstore.StrictArrayType{}, err
+	// Finally, parse the type
+	elem, ok := p.parseType()
+	if !ok {
+		return numstore.StrictArrayType{}, false
 	}
+
 	return numstore.StrictArrayType{
-		Rank: uint32(len(dims)),
 		Dims: dims,
 		Of:   elem,
-	}, nil
+	}, true
 }
 
-func (p *parser) parsePrimitive() (numstore.PrimitiveType, error) {
-	tok, err := p.expect(TOK_PRIM)
-	if err != nil {
-		return numstore.PrimitiveType{}, err
+func (p *parser) parsePrimitive() (numstore.PrimitiveType, bool) {
+	// Parse the primitive
+	tok, ok := p.expect(TOK_PRIM)
+	if !ok {
+		p.parserError(TOK_PRIM)
+		return numstore.PrimitiveType{}, false
 	}
 
+	// Convert string to primitive. This shouldn't fail
 	pt, ok := numstore.PrimitiveTypeFromString(tok.value)
 	if !ok {
-		return numstore.PrimitiveType{},
-			fmt.Errorf("Invalid primitive %q", tok.value)
+		p.parserError()
+		return numstore.PrimitiveType{}, false
 	}
 
-	return numstore.PrimitiveType{PT: pt}, nil
+	return numstore.PrimitiveType{PT: pt}, true
 }
 
-func (p *parser) parseVarArray() (numstore.VarArrayType, error) {
+func (p *parser) parseVarArray() (numstore.VarArrayType, bool) {
 	// Reminder - previous function consumed first token, expect ']' first
-
+	// Meaning the loop runs at least once
 	rank := uint32(0)
+
 	for {
-		// Expect "]"
-		if _, err := p.expect(TOK_RIGHT_BRACKET); err != nil {
-			return numstore.VarArrayType{}, fmt.Errorf("expected ] for var array")
+		// End with right bracket
+		if _, ok := p.expect(TOK_RIGHT_BRACKET); !ok {
+			return numstore.VarArrayType{}, false
 		}
+
 		rank++
 
-		// Maybe Expect "["
-		if _, err := p.expect(TOK_LEFT_BRACKET); err != nil {
+		// Start with left bracket
+		if _, ok := p.expect(TOK_LEFT_BRACKET); !ok {
 			break
 		}
 	}
 
-	elem, err := p.parseType()
-	if err != nil {
-		return numstore.VarArrayType{}, err
+	// Finally parse the type
+	elem, ok := p.parseType()
+	if !ok {
+		return numstore.VarArrayType{}, false
 	}
 
 	return numstore.VarArrayType{
 		Rank: rank,
 		Of:   elem,
-	}, nil
+	}, true
 }
 
-func (p *parser) parseStructOrUnion(prefixTok tokenType) (map[string]numstore.Type, error) {
-	// Expect 'struct'
-	_, err := p.expect(prefixTok)
-	if err != nil {
-		return nil, err
+func (p *parser) parseStructOrUnion(prefixTok tokenType) (map[string]numstore.Type, bool) {
+	// Expect 'struct' or 'union'
+	if _, ok := p.expect(prefixTok); !ok {
+		p.parserError(prefixTok)
+		return nil, false
 	}
 
-	// Expect '{'
-	_, err = p.expect(TOK_LEFT_CURLY)
-	if err != nil {
-		return nil, err
+	// Left curly next
+	if _, ok := p.expect(TOK_LEFT_CURLY); !ok {
+		p.parserError(TOK_LEFT_CURLY)
+		return nil, false
 	}
 
-	// Parse Fields
 	fields := make(map[string]numstore.Type)
+
 	for {
-		// Name
-		nameTok, err := p.expect(TOK_IDENTIFIER)
-		if err != nil {
-			return nil, err
+		// First, parse the name of the field
+		if nameTok, ok := p.expect(TOK_IDENTIFIER); !ok {
+			p.parserError(TOK_IDENTIFIER)
+			return nil, false
+		} else {
+
+			// Then parse the type afterwards
+			fieldType, ok := p.parseType()
+			if !ok {
+				p.parserError()
+				return nil, false
+			}
+
+			// Check if this field already exists
+			if _, exists := fields[nameTok.value]; exists {
+				return nil, false
+			}
+			fields[nameTok.value] = fieldType
 		}
 
-		// Type
-		fieldType, err := p.parseType()
-		if err != nil {
-			return nil, err
-		}
-
-		// Check conflicts
-		if _, ok := fields[nameTok.value]; ok {
-			return nil, fmt.Errorf("Invalid struct type,"+
-				"got conflicting fields: %v\n", nameTok.value)
-		}
-		fields[nameTok.value] = fieldType
-
-		// Expect ',' or '}'
-		if tok, _ := p.peekToken(); tok.ttype == TOK_COMMA {
-			p.nextToken()
+		// Check for comma or right curly
+		if _, ok := p.expect(TOK_COMMA); ok {
 			continue
-		} else if tok.ttype == TOK_RIGHT_CURLY {
-			p.nextToken()
+		} else if _, ok := p.expect(TOK_RIGHT_CURLY); ok {
 			break
 		} else {
-			return nil, expectedAnyButGot(tok.ttype,
-				TOK_COMMA, TOK_RIGHT_CURLY)
+			p.parserError(TOK_COMMA, TOK_RIGHT_CURLY)
+			return nil, false
 		}
 	}
-
-	return fields, nil
+	return fields, true
 }
 
-func (p *parser) parseEnum() (numstore.EnumType, error) {
-	_, err := p.expect(TOK_ENUM)
-	if err != nil {
-		return numstore.EnumType{}, err
+func (p *parser) parseEnum() (numstore.EnumType, bool) {
+	// Parse enum keyword
+	if _, ok := p.expect(TOK_ENUM); !ok {
+		p.parserError(TOK_ENUM)
+		return numstore.EnumType{}, false
 	}
 
-	// Expect '{'
-	_, err = p.expect(TOK_LEFT_CURLY)
-	if err != nil {
-		return numstore.EnumType{}, err
+	// Next, check for '{'
+	if _, ok := p.expect(TOK_LEFT_CURLY); !ok {
+		p.parserError(TOK_LEFT_CURLY)
+		return numstore.EnumType{}, false
 	}
 
 	opts := []string{}
 
 	for {
-		// Expect name
-		if label, err := p.expect(TOK_IDENTIFIER); err != nil {
-			return numstore.EnumType{}, err
+		// First, the name of the field
+		if label, ok := p.expect(TOK_IDENTIFIER); !ok {
+			return numstore.EnumType{}, false
 		} else {
 			opts = append(opts, label.value)
 		}
 
-		// Expect ',' or '}'
-		if tok, _ := p.peekToken(); tok.ttype == TOK_COMMA {
-			p.nextToken()
+		// Then check for comma or right curly
+		if _, ok := p.expect(TOK_COMMA); ok {
 			continue
-		} else if tok.ttype == TOK_RIGHT_CURLY {
-			p.nextToken()
+		} else if _, ok := p.expect(TOK_RIGHT_CURLY); ok {
 			break
+		} else {
+			p.parserError(TOK_COMMA, TOK_RIGHT_CURLY)
+			return numstore.EnumType{}, false
 		}
 	}
 
-	return numstore.EnumType{Options: opts}, nil
+	return numstore.EnumType{Options: opts}, true
 }

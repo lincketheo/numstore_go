@@ -101,6 +101,7 @@ OpenWriteContext	internal/numstore/writing.go	/^type OpenWriteContext struct {$/
 OpenWriteFormat2	internal/numstore/writing.go	/^func (w WriteFormat2) OpenWriteFormat2() (WriteContext, error) {$/;"	f	struct:numstore.WriteFormat2	typeref:typename:(WriteContext, error)
 Options	internal/numstore/nstypes.go	/^	Options []string `json:"options"`$/;"	m	struct:numstore.EnumType	typeref:typename:[]string
 PT	internal/numstore/nstypes.go	/^	PT primitiveType `json:"type"`$/;"	m	struct:numstore.PrimitiveType	typeref:typename:primitiveType
+Parse	internal/compiler/parser.go	/^func Parse(tokens []token) error {$/;"	f	package:compiler	typeref:typename:error
 Parse	internal/numstore/property.go	/^  Parse(json string) string$/;"	n	interface:numstore.PropertyType	typeref:typename:string
 ParseUInt32Slice	internal/utils/numbers.go	/^func ParseUInt32Slice(input string) ([]uint32, error) {$/;"	f	package:utils	typeref:typename:([]uint32, error)
 PrettyString	internal/numstore/property.go	/^	PrettyString() string$/;"	n	interface:numstore.PropertyType	typeref:typename:string
@@ -111,14 +112,12 @@ ProgramName	internal/utils/config.go	/^var ProgramName = "NDB"$/;"	v	package:uti
 PropertyType	internal/numstore/property.go	/^type PropertyType interface {$/;"	i	package:numstore
 PropertyTypeFactory	internal/numstore/property.go	/^type PropertyTypeFactory interface {$/;"	i	package:numstore
 Range	internal/numstore/range.go	/^type Range struct {$/;"	s	package:numstore
-Rank	internal/numstore/nstypes.go	/^	Rank uint32   `json:"rank"`$/;"	m	struct:numstore.StrictArrayType	typeref:typename:uint32
 Rank	internal/numstore/nstypes.go	/^	Rank uint32 `json:"rank"`$/;"	m	struct:numstore.VarArrayType	typeref:typename:uint32
 Read	main.md	/^# Read$/;"	c
 ReadContextRequest	internal/numstore/reader.go	/^type ReadContextRequest struct {$/;"	s	package:numstore
 ReadFile	internal/utils/fs.go	/^func ReadFile(path string) ([]byte, error) {$/;"	f	package:utils	typeref:typename:([]byte, error)
 ReduceMultU32	internal/utils/arrays.go	/^func ReduceMultU32(arr []uint32) uint32 {$/;"	f	package:utils	typeref:typename:uint32
 Register	internal/numstore/property.go	/^func Register(factory PropertyTypeFactory) {$/;"	f	package:numstore
-RunTokens	internal/compiler/parser.go	/^func RunTokens(tokens []token) error {$/;"	f	package:compiler	typeref:typename:error
 Scan	internal/compiler/scanner.go	/^func Scan(data string) []token {$/;"	f	package:compiler	typeref:typename:[]token
 Serialize	internal/numstore/property.go	/^  Serialize() string$/;"	n	interface:numstore.PropertyType	typeref:typename:string
 Shape	internal/numstore/variable.go	/^	Shape []uint32      `json:"shape"`$/;"	m	struct:numstore.VariableMeta	typeref:typename:[]uint32
@@ -201,6 +200,7 @@ WriteNext	internal/numstore/variable.go	/^func (v WritingVariable) WriteNext(r i
 WritingVariable	internal/numstore/variable.go	/^type WritingVariable struct {$/;"	s	package:numstore
 _ptToString	internal/numstore/nstypes.go	/^	_ptToString = map[primitiveType]string{$/;"	v	package:numstore
 _stringToPT	internal/numstore/nstypes.go	/^	_stringToPT = func() map[string]primitiveType {$/;"	v	package:numstore
+arrRange	internal/compiler/parseRange.go	/^type arrRange struct {$/;"	s	package:compiler
 checkKeyword	internal/compiler/scanner.go	/^func (s *scanner) checkKeyword() tokenType {$/;"	f	struct:compiler.scanner	typeref:typename:tokenType
 cleanInput	internal/frontend/common.go	/^func cleanInput(text string) string {$/;"	f	package:nsfrontend	typeref:typename:string
 clearScreen	internal/frontend/shell.go	/^func clearScreen() {$/;"	f	package:nsfrontend
@@ -228,7 +228,6 @@ dbMetaFileName	internal/numstore/database.go	/^func dbMetaFileName(d Database) s
 dbname	internal/numstore/writing.go	/^	dbname    string$/;"	m	struct:numstore.OpenWriteContext	typeref:typename:string
 dbname	internal/numstore/writing.go	/^	dbname    string$/;"	m	struct:numstore.WriteContext	typeref:typename:string
 debugLogger	internal/logging/logging.go	/^	debugLogger = log.New(os.Stdout, "[DEBUG] ", 0)$/;"	v	package:logging
-dimRange	internal/compiler/parseRange.go	/^  dimRange []ranges$/;"	m	struct:compiler.range	typeref:typename:[]ranges
 dimRange	internal/compiler/parseRange.go	/^type dimRange struct {$/;"	s	package:compiler
 displayHelp	internal/frontend/shell.go	/^func displayHelp() {$/;"	f	package:nsfrontend
 dtype	foo/bar/meta.json	/^{"name":"bar","dtype":"U64","shape":[]}/;"	s
@@ -236,24 +235,17 @@ dtype	foo/baz/meta.json	/^{"name":"baz","dtype":"U32","shape":[]}/;"	s
 dtype	foo/fiz/meta.json	/^{"name":"fiz","dtype":"U32","shape":[]}/;"	s
 enableAsserts	internal/utils/assert.go	/^const enableAsserts = true$/;"	c	package:utils
 errorLogger	internal/logging/logging.go	/^	errorLogger = log.New(os.Stderr, "[ERROR] ", 0)$/;"	v	package:logging
-expect	internal/compiler/parser.go	/^func (p *parser) expect(t tokenType) (token, error) {$/;"	f	struct:compiler.parser	typeref:typename:(token, error)
-expectedAfter	internal/compiler/errors.go	/^func expectedAfter(exp, after tokenType) error {$/;"	f	package:compiler	typeref:typename:error
-expectedAnyButGot	internal/compiler/errors.go	/^func expectedAnyButGot(got tokenType, exp ...tokenType) error {$/;"	f	package:compiler	typeref:typename:error
-expectedStrButEOF	internal/compiler/errors.go	/^func expectedStrButEOF(str string) error {$/;"	f	package:compiler	typeref:typename:error
-expectedTokButEOF	internal/compiler/errors.go	/^func expectedTokButEOF(tok tokenType) error {$/;"	f	package:compiler	typeref:typename:error
+expect	internal/compiler/parser.go	/^func (p *parser) expect(t tokenType) (token, bool) {$/;"	f	struct:compiler.parser	typeref:typename:(token, bool)
 handleCmd	internal/frontend/common.go	/^func handleCmd(cmd string) {$/;"	f	package:nsfrontend
 handleTokClose	internal/compiler/parser.go	/^func (t *parser) handleTokClose() error {$/;"	f	struct:compiler.parser	typeref:typename:error
-handleTokCreate	internal/compiler/parser.go	/^func (t *parser) handleTokCreate() error {$/;"	f	struct:compiler.parser	typeref:typename:error
-handleTokDelete	internal/compiler/parser.go	/^func (t *parser) handleTokDelete() error {$/;"	f	struct:compiler.parser	typeref:typename:error
+handleTokCreate	internal/compiler/parser.go	/^func (t *parser) handleTokCreate() {$/;"	f	struct:compiler.parser
+handleTokDelete	internal/compiler/parser.go	/^func (t *parser) handleTokDelete() {$/;"	f	struct:compiler.parser
 handleTokOpen	internal/compiler/parser.go	/^func (t *parser) handleTokOpen() error {$/;"	f	struct:compiler.parser	typeref:typename:error
 handleTokRead	internal/compiler/parser.go	/^func (t *parser) handleTokRead() error {$/;"	f	struct:compiler.parser	typeref:typename:error
 handleTokTake	internal/compiler/parser.go	/^func (t *parser) handleTokTake() error {$/;"	f	struct:compiler.parser	typeref:typename:error
 handleTokWrite	internal/compiler/parser.go	/^func (t *parser) handleTokWrite() error {$/;"	f	struct:compiler.parser	typeref:typename:error
 infoLogger	internal/logging/logging.go	/^	infoLogger  = log.New(os.Stdout, "[INFO]  ", 0)$/;"	v	package:logging
 interpretRange	internal/numstore/range.go	/^func interpretRange(toks []parse_tok, stack []int) (looseRange, error) {$/;"	f	package:numstore	typeref:typename:(looseRange, error)
-invalidAfter	internal/compiler/errors.go	/^func invalidAfter(after, before tokenType) error {$/;"	f	package:compiler	typeref:typename:error
-invalidAfterExpected	internal/compiler/errors.go	/^func invalidAfterExpected(after, before, exp tokenType) error {$/;"	f	package:compiler	typeref:typename:error
-invalidExpected	internal/compiler/errors.go	/^func invalidExpected(tok, exp tokenType) error {$/;"	f	package:compiler	typeref:typename:error
 isEnd	internal/compiler/parser.go	/^func (t parser) isEnd() bool {$/;"	f	struct:compiler.parser	typeref:typename:bool
 isEnd	internal/compiler/scanner.go	/^func (s scanner) isEnd() bool {$/;"	f	struct:compiler.scanner	typeref:typename:bool
 isError	internal/compiler/parser.go	/^	isError bool$/;"	m	struct:compiler.parser	typeref:typename:bool
@@ -285,30 +277,31 @@ numstore	internal/numstore/range.go	/^package numstore$/;"	p
 numstore	internal/numstore/reader.go	/^package numstore$/;"	p
 numstore	internal/numstore/variable.go	/^package numstore$/;"	p
 numstore	internal/numstore/writing.go	/^package numstore$/;"	p
-parseArray	internal/compiler/parseType.go	/^func (p *parser) parseArray() (numstore.Type, error) {$/;"	f	unknown:compiler.parser	typeref:typename:(numstore.Type, error)
-parseEnum	internal/compiler/parseType.go	/^func (p *parser) parseEnum() (numstore.EnumType, error) {$/;"	f	unknown:compiler.parser	typeref:typename:(numstore.EnumType, error)
+parseArray	internal/compiler/parseType.go	/^func (p *parser) parseArray() (numstore.Type, bool) {$/;"	f	unknown:compiler.parser	typeref:typename:(numstore.Type, bool)
+parseEnum	internal/compiler/parseType.go	/^func (p *parser) parseEnum() (numstore.EnumType, bool) {$/;"	f	unknown:compiler.parser	typeref:typename:(numstore.EnumType, bool)
 parseIdent	internal/compiler/scanner.go	/^func (s *scanner) parseIdent() tokenType {$/;"	f	struct:compiler.scanner	typeref:typename:tokenType
 parseNumber	internal/compiler/scanner.go	/^func (s *scanner) parseNumber() tokenType {$/;"	f	struct:compiler.scanner	typeref:typename:tokenType
-parsePrimitive	internal/compiler/parseType.go	/^func (p *parser) parsePrimitive() (numstore.PrimitiveType, error) {$/;"	f	unknown:compiler.parser	typeref:typename:(numstore.PrimitiveType, error)
+parsePrimitive	internal/compiler/parseType.go	/^func (p *parser) parsePrimitive() (numstore.PrimitiveType, bool) {$/;"	f	unknown:compiler.parser	typeref:typename:(numstore.PrimitiveType, bool)
 parseRange	internal/numstore/range.go	/^func parseRange(str string) ([]parse_tok, []int, error) {$/;"	f	package:numstore	typeref:typename:([]parse_tok, []int, error)
 parseReadFormat	internal/compiler/parseRead.go	/^func (p *parser) parseReadFormat() {$/;"	f	unknown:compiler.parser
-parseStrictArray	internal/compiler/parseType.go	/^func (p *parser) parseStrictArray() (numstore.StrictArrayType, error) {$/;"	f	unknown:compiler.parser	typeref:typename:(numstore.StrictArrayType, error)
+parseStrictArray	internal/compiler/parseType.go	/^func (p *parser) parseStrictArray() (numstore.StrictArrayType, bool) {$/;"	f	unknown:compiler.parser	typeref:typename:(numstore.StrictArrayType, bool)
 parseString	internal/compiler/scanner.go	/^func (s *scanner) parseString() {$/;"	f	struct:compiler.scanner
-parseStructOrUnion	internal/compiler/parseType.go	/^func (p *parser) parseStructOrUnion(prefixTok tokenType) (map[string]numstore.Type, error) {$/;"	f	unknown:compiler.parser	typeref:typename:(map[string]numstore.Type, error)
-parseType	internal/compiler/parseType.go	/^func (p *parser) parseType() (numstore.Type, error) {$/;"	f	unknown:compiler.parser	typeref:typename:(numstore.Type, error)
-parseVarArray	internal/compiler/parseType.go	/^func (p *parser) parseVarArray() (numstore.VarArrayType, error) {$/;"	f	unknown:compiler.parser	typeref:typename:(numstore.VarArrayType, error)
+parseStructOrUnion	internal/compiler/parseType.go	/^func (p *parser) parseStructOrUnion(prefixTok tokenType) (map[string]numstore.Type, bool) {$/;"	f	unknown:compiler.parser	typeref:typename:(map[string]numstore.Type, bool)
+parseType	internal/compiler/parseType.go	/^func (p *parser) parseType() (numstore.Type, bool) {$/;"	f	unknown:compiler.parser	typeref:typename:(numstore.Type, bool)
+parseVarArray	internal/compiler/parseType.go	/^func (p *parser) parseVarArray() (numstore.VarArrayType, bool) {$/;"	f	unknown:compiler.parser	typeref:typename:(numstore.VarArrayType, bool)
 parseWriteFormat	internal/compiler/parseWrite.go	/^func (p *parser) parseWriteFormat() (numstore.WriteFormat, error) {$/;"	f	unknown:compiler.parser	typeref:typename:(numstore.WriteFormat, error)
 parseWriteFormatList	internal/compiler/parseWrite.go	/^func (p *parser) parseWriteFormatList() ([][]string, error) {$/;"	f	unknown:compiler.parser	typeref:typename:([][]string, error)
 parseWriteFormatTuple	internal/compiler/parseWrite.go	/^func (p *parser) parseWriteFormatTuple() ([]string, error) {$/;"	f	unknown:compiler.parser	typeref:typename:([]string, error)
 parse_tok	internal/numstore/range.go	/^type parse_tok int$/;"	t	package:numstore	typeref:typename:int
 parser	internal/compiler/parser.go	/^type parser struct {$/;"	s	package:compiler
+parserError	internal/compiler/parser.go	/^func (t *parser) parserError(exp ...tokenType) {$/;"	f	struct:compiler.parser
 peek2Char	internal/compiler/scanner.go	/^func (s scanner) peek2Char() byte {$/;"	f	struct:compiler.scanner	typeref:typename:byte
 peekChar	internal/compiler/scanner.go	/^func (s scanner) peekChar() byte {$/;"	f	struct:compiler.scanner	typeref:typename:byte
 peekToken	internal/compiler/parser.go	/^func (t parser) peekToken() (token, bool) {$/;"	f	struct:compiler.parser	typeref:typename:(token, bool)
 primitiveType	internal/numstore/nstypes.go	/^type primitiveType uint8$/;"	t	package:numstore	typeref:typename:uint8
 primitiveTypeSizeof	internal/numstore/nstypes.go	/^func primitiveTypeSizeof(pt primitiveType) uint32 {$/;"	f	package:numstore	typeref:typename:uint32
 propTypeRegistry	internal/numstore/property.go	/^var propTypeRegistry = make(map[string]PropertyTypeFactory)$/;"	v	package:numstore
-range	internal/compiler/parseRange.go	/^type range struct {$/;"	s	package:compiler
+ranges	internal/compiler/parseRange.go	/^  ranges []dimRange$/;"	m	struct:compiler.arrRange	typeref:typename:[]dimRange
 scanNextToken	internal/compiler/scanner.go	/^func (s *scanner) scanNextToken() token {$/;"	f	struct:compiler.scanner	typeref:typename:token
 scanNextTokenType	internal/compiler/scanner.go	/^func (s *scanner) scanNextTokenType() tokenType {$/;"	f	struct:compiler.scanner	typeref:typename:tokenType
 scanner	internal/compiler/scanner.go	/^type scanner struct {$/;"	s	package:compiler
@@ -343,6 +336,7 @@ tokenType	internal/compiler/tokens.go	/^type tokenType int$/;"	t	package:compile
 tokens	internal/compiler/parser.go	/^	tokens  []token$/;"	m	struct:compiler.parser	typeref:typename:[]token
 traceLogger	internal/logging/logging.go	/^	traceLogger = log.New(os.Stdout, "[TRACE] ", 0)$/;"	v	package:logging
 ttype	internal/compiler/tokens.go	/^	ttype tokenType$/;"	m	struct:compiler.token	typeref:typename:tokenType
+typeStartTokens	internal/compiler/parseType.go	/^var typeStartTokens = []tokenType{TOK_UNION, TOK_STRUCT, TOK_ENUM, TOK_LEFT_BRACKET, TOK_PRIM}$/;"	v	package:compiler
 unmarshalType	internal/numstore/nstypes.go	/^func unmarshalType(raw json.RawMessage) (Type, error) {$/;"	f	package:numstore	typeref:typename:(Type, error)
 utils	internal/utils/arrays.go	/^package utils$/;"	p
 utils	internal/utils/assert.go	/^package utils$/;"	p

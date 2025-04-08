@@ -1,0 +1,23 @@
+#topbar {
+  background-image: url("images/abc.png");
+  background-position: 12px 13px;
+  font-size: 1px;
+  left: 36px;
+  margin-top: 10px;
+  position: relative;
+  top: 23px;
+  vertical-align: middle;
+  width: 200px;
+}
+
+#topbar .logo {
+  top: 50%;
+  position: absolute;
+  left: 20px;
+  transform: translateY(-50%);
+  font-size: 28px;
+  font-weight: bold;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
