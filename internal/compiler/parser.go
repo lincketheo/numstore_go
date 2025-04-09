@@ -27,7 +27,6 @@ func Parse(tokens []token) ([]byte, bool) {
 		cur:    0,
 	}
 
-	// Create a map of token types to their corresponding handler functions.
 	handlers := map[tokenType]tokenHandler{
 		TOK_CREATE: p.handleTokCreate,
 		TOK_DELETE: p.handleTokDelete,

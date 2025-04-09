@@ -1,0 +1,5 @@
+- Add ToWrite and ToRead in write / read 
+- Make error handling better with windups in the main parse loop
+- Gracefully output bytecode to file 
+- Validate inverse pop code
+- Tests 
