@@ -1,8 +1,6 @@
 package compiler
 
 import (
-	"fmt"
-
 	"github.com/lincketheo/numstore/internal/logging"
 	"github.com/lincketheo/numstore/internal/numstore"
 	"github.com/lincketheo/numstore/internal/utils"
@@ -26,7 +24,6 @@ func Scan(data string) []token {
 			continue
 		}
 		ret = append(ret, tok)
-		fmt.Println(tok.ttype, tok.value)
 		if tok.ttype == TOK_EOF {
 			break
 		}
@@ -99,8 +96,8 @@ func (s *scanner) scanNextTokenType() tokenType {
 		return TOK_RIGHT_PAREN
 	case ',':
 		return TOK_COMMA
-	case ';':
-		return TOK_SEMICOLON
+	case ':':
+		return TOK_COLON
 	case '"':
 		{
 			s.parseString()

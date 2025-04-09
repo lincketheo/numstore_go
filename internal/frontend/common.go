@@ -13,7 +13,7 @@ func cleanInput(text string) string {
 }
 
 func handleCmd(cmd string) {
-  if err := compiler.RunTokens(compiler.Scan(cmd)); err != nil {
-    fmt.Println(err)
+  if !compiler.Parse(compiler.Scan(cmd)) {
+    fmt.Println("ERROR")
   }
 }

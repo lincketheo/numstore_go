@@ -39,24 +39,30 @@ func (t parser) peekToken() (token, bool) {
 	return t.tokens[t.cur], true
 }
 
-func (p *parser) expect(t tokenType) (token, bool) {
+func (p *parser) expect(ttypes ...tokenType) (token, bool) {
 	tok, ok := p.peekToken()
 	if !ok {
 		return token{}, false
 	}
-
-	if tok.ttype != t {
+	match := false
+	for _, expected := range ttypes {
+		if tok.ttype == expected {
+			match = true
+			break
+		}
+	}
+	if !match {
 		return token{}, false
 	}
-
-	// advance
 	return p.nextToken()
 }
 
+type tokenHandler func() bool
+
 // ////////////////////////////// PARSE
-func Parse(tokens []token) error {
+func Parse(tokens []token) bool {
 	if len(tokens) == 0 {
-		return nil
+		return true
 	}
 
 	runner := parser{
@@ -64,159 +70,114 @@ func Parse(tokens []token) error {
 		cur:    0,
 	}
 
+	// Create a map of token types to their corresponding handler functions.
+	handlers := map[tokenType]tokenHandler{
+		TOK_CREATE: runner.handleTokCreate,
+		TOK_DELETE: runner.handleTokDelete,
+		TOK_READ:   runner.handleTokRead,
+		TOK_WRITE:  runner.handleTokWrite,
+		TOK_TAKE:   runner.handleTokTake,
+	}
+
+	// Iterate over tokens.
 	for t, ok := runner.nextToken(); ok; t, ok = runner.nextToken() {
 		switch t.ttype {
-		case TOK_CREATE:
-			runner.handleTokCreate()
-		case TOK_DELETE:
-			{
-				if err := runner.handleTokDelete(); err != nil {
-					return err
-				}
-			}
-		case TOK_READ:
-			{
-				if err := runner.handleTokRead(); err != nil {
-					return err
-				}
-			}
-		case TOK_WRITE:
-			{
-				if err := runner.handleTokWrite(); err != nil {
-					return err
-				}
-			}
-		case TOK_OPEN:
-			{
-				if err := runner.handleTokOpen(); err != nil {
-					return err
-				}
-			}
-		case TOK_CLOSE:
-			{
-				if err := runner.handleTokClose(); err != nil {
-					return err
-				}
-			}
-		case TOK_TAKE:
-			{
-				if err := runner.handleTokTake(); err != nil {
-					return err
-				}
-			}
 		case TOK_EOF:
-			{
-				return nil
-			}
+			return true
 		default:
-			return fmt.Errorf("Invalid token: %v", t)
-		}
-
-		if _, err := runner.expect(TOK_SEMICOLON); err != nil {
-			return err
+			// If a handler exists for the token, call it.
+			if handler, exists := handlers[t.ttype]; exists {
+				if !handler() {
+					return false
+				}
+			} else {
+				runner.parserError()
+				return false
+			}
 		}
 	}
 
-	panic("Unreachable")
+	return true
 }
 
 // DONE
-func (t *parser) handleTokCreate() {
-	v, ok := t.nextToken()
-	if !ok {
+func (t *parser) handleTokCreate() bool {
+	// create VAR TYPE
+
+	if v, ok := t.expect(TOK_IDENTIFIER); !ok {
+		// Parse VAR
 		t.parserError(TOK_IDENTIFIER)
-		return
-	}
+		return false
 
-	if v.ttype != TOK_IDENTIFIER {
-    t.parserError(TOK_IDENTIFIER)
-		return
-	}
+	} else if nstype, ok := t.parseType(); !ok {
+		// PARSE TYPE
+		return false
 
-	if nstype, err := t.parseType(); err != nil {
-		return err
 	} else {
-		fmt.Printf("CREATING: %v\n", nstype)
+		// Execute
+		fmt.Printf("CREATING variable: %v with type %v\n", v.value, nstype)
+		return true
 	}
 }
 
-func (t *parser) handleTokDelete() {
-	v, ok := t.nextToken()
-	if !ok {
-		t.parserError(TOK_DELETE, TOK_IDENTIFIER)
-		return
-	}
+func (t *parser) handleTokDelete() bool {
+	// delete VAR
 
-	if v.ttype != TOK_IDENTIFIER {
-		t.parserError(TOK_DELETE, TOK_IDENTIFIER)
-		return
-	}
+	if v, ok := t.expect(TOK_IDENTIFIER); !ok {
+		// Parse VAR
+		t.parserError(TOK_IDENTIFIER)
+		return false
 
-	fmt.Printf("DELETING: %v\n", v.value)
+	} else {
+		// Execute
+		fmt.Printf("DELETING: %v\n", v.value)
+		return true
+	}
 }
 
-func (t *parser) handleTokRead() error {
-	v, ok := t.nextToken()
-	if !ok {
-		return expectedTokenAfterToken(TOK_IDENTIFIER, TOK_READ)
-	}
+func (t *parser) handleTokRead() bool {
+	// read RFMT
 
-	if v.ttype != TOK_IDENTIFIER {
-		return invalidTokenAfterTokenExpected(v.ttype, TOK_READ, TOK_IDENTIFIER)
-	}
+	if rfmt, ok := t.parseRFMT(); !ok {
+		// Parse RFMT
+		return false
 
-	fmt.Printf("READING: %v\n", v.value)
-	return nil
+	} else {
+		// Execute
+		fmt.Printf("READING: RFMT: %v\n", rfmt)
+		return true
+	}
 }
 
 // DONE
-func (t *parser) handleTokWrite() error {
-	if wfmt, err := t.parseWriteFormat(); err != nil {
-		return err
+func (t *parser) handleTokWrite() bool {
+	// write WFMT
+
+	if wfmt, ok := t.parseWFMT(); !ok {
+		// Parse WFMT
+		return false
+
 	} else {
-		fmt.Printf("Writing: %v\n", wfmt)
-		return nil
+		// Execute
+		fmt.Printf("Writing: WFMT: %v\n", wfmt)
+		return true
 	}
 }
 
-func (t *parser) handleTokOpen() error {
-	v, ok := t.nextToken()
-	if !ok {
-		return expectedTokenAfterToken(TOK_IDENTIFIER, TOK_OPEN)
+func (t *parser) handleTokTake() bool {
+	// take VAR RFMT
+
+	if v, ok := t.expect(TOK_IDENTIFIER); !ok {
+		// Parse VAR
+		return false
+
+	} else if rfmt, ok := t.parseRFMT(); !ok {
+		// Parse RFMT
+		return false
+
+	} else {
+		// Execute
+		fmt.Printf("TAKING: %v with RFMT: %v\n", v.value, rfmt)
+		return true
 	}
-
-	if v.ttype != TOK_IDENTIFIER {
-		return invalidTokenAfterTokenExpected(v.ttype, TOK_OPEN, TOK_IDENTIFIER)
-	}
-
-	fmt.Printf("OPENING: %v\n", v.value)
-	return nil
-}
-
-func (t *parser) handleTokClose() error {
-	v, ok := t.nextToken()
-	if !ok {
-		return expectedTokenAfterToken(TOK_IDENTIFIER, TOK_CLOSE)
-	}
-
-	if v.ttype != TOK_IDENTIFIER {
-		return invalidTokenAfterTokenExpected(v.ttype, TOK_CLOSE, TOK_IDENTIFIER)
-	}
-
-	fmt.Printf("CLOSEING: %v\n", v.value)
-	return nil
-}
-
-func (t *parser) handleTokTake() error {
-	v, ok := t.nextToken()
-	if !ok {
-		return expectedTokenAfterToken(TOK_IDENTIFIER, TOK_TAKE)
-	}
-
-	if v.ttype != TOK_IDENTIFIER {
-		return invalidTokenAfterTokenExpected(v.ttype, TOK_TAKE, TOK_IDENTIFIER)
-	}
-
-	fmt.Printf("TAKEING: %v\n", v.value)
-	return nil
 }

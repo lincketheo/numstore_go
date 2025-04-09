@@ -10,6 +10,10 @@ type token struct {
 	line  int
 }
 
+func newToken(ttype tokenType, value string, line int) token {
+	return token{ttype: ttype, value: value, line: line}
+}
+
 func (t token) String() string {
 	return fmt.Sprintf("{Token: %s Value: %s Line %d}",
 		t.ttype.String(), t.value, t.line)
@@ -43,7 +47,7 @@ const (
 	TOK_LEFT_PAREN
 	TOK_RIGHT_PAREN
 	TOK_COMMA
-	TOK_SEMICOLON
+	TOK_COLON
 
 	// Values
 	TOK_IDENTIFIER
@@ -104,8 +108,8 @@ func (t tokenType) String() string {
 		return "TOK_LEFT_PAREN"
 	case TOK_COMMA:
 		return "TOK_COMMA"
-	case TOK_SEMICOLON:
-		return "TOK_SEMICOLON"
+	case TOK_COLON:
+		return "TOK_COLON"
 
 		// Values
 	case TOK_IDENTIFIER:
