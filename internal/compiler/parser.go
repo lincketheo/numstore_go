@@ -12,13 +12,11 @@ type parser struct {
 	bc      bytecode.ByteCode
 }
 
-func (t parser) isEnd() bool {
-	return t.cur >= len(t.tokens)
-}
+
+// ////////////////////////////// PARSE
 
 type tokenHandler func() bool
 
-// ////////////////////////////// PARSE
 func Parse(tokens []token) ([]byte, bool) {
 	if len(tokens) == 0 {
 		return []byte{}, true

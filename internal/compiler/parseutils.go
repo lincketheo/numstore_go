@@ -15,6 +15,10 @@ func (t *parser) windNext() {
 	}
 }
 
+func (t parser) isEnd() bool {
+	return t.cur >= len(t.tokens)
+}
+
 func (t *parser) parserError(exp ...tokenType) {
 	t.isError = true
 	logging.Error("Expected token types: %v", exp)
