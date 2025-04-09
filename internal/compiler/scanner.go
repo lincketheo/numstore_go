@@ -223,6 +223,6 @@ func (s *scanner) nextChar() byte {
 	utils.Assert(!s.isEnd())
 	i := s.current
 	s.current++
-  s.col++
+	s.col++
 	return s.data[i]
 }
