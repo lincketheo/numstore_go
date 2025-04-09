@@ -2,6 +2,7 @@ package nsfrontend
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/lincketheo/numstore/internal/compiler"
@@ -13,7 +14,9 @@ func cleanInput(text string) string {
 }
 
 func handleCmd(cmd string) {
-  if !compiler.Parse(compiler.Scan(cmd)) {
+  if bytes, ok := compiler.Parse(compiler.Scan(cmd)); !ok {
     fmt.Println("ERROR")
+  } else {
+    os.Stdout.Write(bytes)
   }
 }

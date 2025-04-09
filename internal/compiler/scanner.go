@@ -11,6 +11,7 @@ type scanner struct {
 	start   int
 	current int
 	line    int
+	col     int
 	isError bool
 }
 
@@ -54,6 +55,7 @@ func (s *scanner) skipWhitespace() {
 		case '\n':
 			{
 				s.line++
+				s.col = 0
 				_ = s.nextChar()
 				break
 			}
@@ -64,10 +66,13 @@ func (s *scanner) skipWhitespace() {
 }
 
 func (s *scanner) scanNextToken() token {
+	col, line := s.col, s.line
+
 	return token{
 		ttype: s.scanNextTokenType(),
 		value: s.data[s.start:s.current],
-		line:  s.line,
+		col:   col,
+		line:  line,
 	}
 }
 
@@ -218,5 +223,6 @@ func (s *scanner) nextChar() byte {
 	utils.Assert(!s.isEnd())
 	i := s.current
 	s.current++
+  s.col++
 	return s.data[i]
 }

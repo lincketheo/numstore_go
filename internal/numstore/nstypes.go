@@ -25,7 +25,7 @@ type Type interface {
 }
 
 type PrimitiveType struct {
-	PT primitiveType `json:"type"`
+	PT PrimType `json:"type"`
 }
 
 type StrictArrayType struct {
@@ -68,7 +68,7 @@ func (UnionType) Kind() NSTypeKind       { return UnionKind }
 func (p PrimitiveType) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		Kind NSTypeKind    `json:"kind"`
-		PT   primitiveType `json:"type"`
+		PT   PrimType `json:"type"`
 	}{
 		Kind: PrimKind,
 		PT:   p.PT,
@@ -77,7 +77,7 @@ func (p PrimitiveType) MarshalJSON() ([]byte, error) {
 
 func (p *PrimitiveType) UnmarshalJSON(data []byte) error {
 	aux := struct {
-		PT primitiveType `json:"type"`
+		PT PrimType `json:"type"`
 	}{}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -282,10 +282,10 @@ func unmarshalType(raw json.RawMessage) (Type, error) {
 // PRIMITIVE‑TYPE
 //
 
-type primitiveType uint8
+type PrimType uint8
 
 const (
-	I8 primitiveType = iota
+	I8 PrimType = iota
 	I16
 	I32
 	I64
@@ -311,7 +311,7 @@ const (
 	Bool
 )
 
-func primitiveTypeSizeof(pt primitiveType) uint32 {
+func PrimTypeSizeof(pt PrimType) uint32 {
 	switch pt {
 	case I8, U8, Char, Bool:
 		return 1
@@ -343,7 +343,7 @@ func primitiveTypeSizeof(pt primitiveType) uint32 {
 }
 
 var (
-	_ptToString = map[primitiveType]string{
+	_ptToString = map[PrimType]string{
 		I8:    "i8",
 		I16:   "i16",
 		I32:   "i32",
@@ -365,8 +365,8 @@ var (
 		Char:  "char",
 		Bool:  "bool",
 	}
-	_stringToPT = func() map[string]primitiveType {
-		m := make(map[string]primitiveType, len(_ptToString))
+	_stringToPT = func() map[string]PrimType {
+		m := make(map[string]PrimType, len(_ptToString))
 		for k, v := range _ptToString {
 			m[v] = k
 		}
@@ -374,23 +374,23 @@ var (
 	}()
 )
 
-func (d primitiveType) String() string {
+func (d PrimType) String() string {
 	if s, ok := _ptToString[d]; ok {
 		return s
 	}
-	panic("invalid primitiveType")
+	panic("invalid PrimType")
 }
 
-func PrimitiveTypeFromString(s string) (primitiveType, bool) {
+func PrimitiveTypeFromString(s string) (PrimType, bool) {
 	pt, ok := _stringToPT[s]
 	return pt, ok
 }
 
-func (d primitiveType) MarshalJSON() ([]byte, error) {
+func (d PrimType) MarshalJSON() ([]byte, error) {
 	return json.Marshal(d.String())
 }
 
-func (d *primitiveType) UnmarshalJSON(data []byte) error {
+func (d *PrimType) UnmarshalJSON(data []byte) error {
 	var name string
 	if err := json.Unmarshal(data, &name); err != nil {
 		return err
@@ -399,5 +399,5 @@ func (d *primitiveType) UnmarshalJSON(data []byte) error {
 		*d = pt
 		return nil
 	}
-	return fmt.Errorf("invalid primitiveType %q", name)
+	return fmt.Errorf("invalid PrimType %q", name)
 }

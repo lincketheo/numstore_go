@@ -40,7 +40,7 @@ func (w WriteFormat2) OpenWriteFormat2() (WriteContext, error) {
 
 			// Do not allow duplicate variables
 			if _, exists := usedVars[v]; exists {
-        return WriteContext{}, fmt.Errorf("Variable: %s was used more than once in write format string", v)
+				return WriteContext{}, fmt.Errorf("Variable: %s was used more than once in write format string", v)
 			}
 
 			// Load variable meta
@@ -87,9 +87,9 @@ func (w WriteContext) OpenWriteContext() (OpenWriteContext, error) {
 	}
 
 	return OpenWriteContext{
-		variables:  result,
-		dbname:     w.dbname,
-		toWrite:    w.toWrite,
+		variables: result,
+		dbname:    w.dbname,
+		toWrite:   w.toWrite,
 	}, nil
 
 failed:

@@ -8,6 +8,7 @@ type token struct {
 	ttype tokenType
 	value string
 	line  int
+	col   int
 }
 
 func newToken(ttype tokenType, value string, line int) token {
